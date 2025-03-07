@@ -4,8 +4,8 @@
 export interface GameCell {
   id: number
   title: string
-  image: string | null
-  name: string | null
+  image?: string
+  name?: string
   imageObj?: HTMLImageElement | null
 }
 
@@ -43,9 +43,8 @@ export interface CanvasConfig {
  * 搜索游戏结果项
  */
 export interface GameSearchResult {
-  id: number;
-  name: string;
-  image: string | null;
+  name: string
+  image: string
 }
 
 /**

@@ -10,7 +10,7 @@ export const isBrowser = typeof window !== 'undefined';
  */
 export const CANVAS_CONFIG: CanvasConfig = {
   width: 1200,
-  height: 1400,
+  height: 1300,
   padding: 40,
   titleHeight: 50,
   gridRows: 4,
@@ -21,10 +21,10 @@ export const CANVAS_CONFIG: CanvasConfig = {
   cellAspectRatio: 0.75, // 宽高比为3:4
   coverRatio: 0.75, // 封面宽高比为3:4
   titleFontSize: 48,
-  cellTitleFontSize: 16,
-  cellNameFontSize: 12,
+  cellTitleFontSize: 22,
+  cellNameFontSize: 14,
   cellTitleMargin: 6,
-  cellNameMargin: 3,
+  cellNameMargin: 6,
 };
 
 /**
@@ -60,9 +60,9 @@ export const CELL_TITLES = [
   "最被高估的",
   "玩的第一款",
   "消磨时间就玩",
-  "我炸会喜欢这个",
+  "我咋会喜欢这个",
   "总有一天能打完",
-  "弃着回",
+  "爷青回",
   "它好小众我好爱",
 ];
 

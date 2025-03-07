@@ -1,13 +1,14 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import NextImage from "next/image"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Gamepad2 } from "lucide-react"
+import { Gamepad2, Loader2, AlertCircle, Search, RefreshCw } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
-import { GameCell, GameSearchResult } from "../types"
+import { GameSearchResult } from "../types"
+import { preloadImage } from "../utils/canvasHelpers"
 
 interface GameSearchDialogProps {
   isOpen: boolean
@@ -16,119 +17,349 @@ interface GameSearchDialogProps {
 }
 
 /**
+ * 搜索状态类型
+ */
+type SearchStatus = {
+  state: 'idle' | 'searching' | 'success' | 'error' | 'no-results';
+  message: string;
+};
+
+/**
  * 游戏搜索对话框组件
  */
 export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame }: GameSearchDialogProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [searchResults, setSearchResults] = useState<GameSearchResult[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const [searchStatus, setSearchStatus] = useState("")
+  const [searchStatus, setSearchStatus] = useState<SearchStatus>({ 
+    state: 'idle', 
+    message: '输入游戏名称开始搜索（建议使用英文名）' 
+  })
+  // 添加状态来跟踪总结果数量
+  const [totalResults, setTotalResults] = useState<number>(0)
+  
+  // 用于存储搜索请求的 AbortController，以便能取消进行中的请求
+  const abortControllerRef = useRef<AbortController | null>(null);
+  
+  // 上一次搜索的关键词
+  const lastSearchTermRef = useRef<string>("");
+
+  // 当对话框打开或关闭时重置状态
+  useEffect(() => {
+    if (isOpen) {
+      // 仅在打开时重置状态，不重置搜索词和结果，以便用户可以继续之前的搜索
+      setIsLoading(false);
+      setSearchStatus({ 
+        state: searchResults.length > 0 ? 'success' : 'idle', 
+        message: searchResults.length > 0 ? '' : '输入游戏名称开始搜索' 
+      });
+    } else {
+      // 关闭时取消正在进行的搜索请求
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+    }
+  }, [isOpen, searchResults.length]);
+
+  // 清空搜索结果和状态
+  const handleClearSearch = () => {
+    // 取消正在进行的搜索请求
+    if (abortControllerRef.current) {
+      console.log('清除搜索时取消进行中的搜索请求');
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    
+    // 重置加载状态
+    setIsLoading(false);
+    
+    // 清空搜索内容和结果
+    setSearchTerm('');
+    setSearchResults([]);
+    setTotalResults(0);
+    setSearchStatus({ state: 'idle', message: '输入游戏名称开始搜索' });
+    lastSearchTermRef.current = '';
+  };
 
   // 搜索游戏 - 使用流式响应
-  const searchGames = async () => {
-    if (!searchTerm.trim()) return
-
-    setIsLoading(true)
-    setSearchResults([])
-    setSearchStatus("正在搜索...")
+  const searchGames = async (retry: boolean = false) => {
+    // 获取搜索词，如果是重试则使用最后一次的搜索词
+    const term = retry ? lastSearchTermRef.current : searchTerm.trim();
+    
+    // 检查搜索词是否为空
+    if (!term) {
+      setSearchStatus({ state: 'idle', message: '请输入游戏名称' });
+      return;
+    }
+    
+    // 取消之前的搜索请求（如果有）
+    if (abortControllerRef.current) {
+      console.log('取消之前的搜索请求');
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    
+    // 创建新的 AbortController
+    abortControllerRef.current = new AbortController();
+    const currentAbortController = abortControllerRef.current;
+    
+    // 更新状态为搜索中
+    setIsLoading(true);
+    
+    // 清除之前的搜索结果，但仅当不是重试的情况下
+    if (!retry) {
+      setSearchResults([]);
+      setTotalResults(0);
+    }
+    
+    setSearchStatus({ state: 'searching', message: '正在搜索...' });
+    
+    // 保存当前搜索词以便重试
+    lastSearchTermRef.current = term;
+    
+    // 超时定时器
+    const timeoutId = setTimeout(() => {
+      if (isLoading && currentAbortController === abortControllerRef.current) {
+        setSearchStatus({ 
+          state: 'searching', 
+          message: '搜索时间较长，正在努力获取结果...' 
+        });
+      }
+    }, 3000);
 
     try {
-      const response = await fetch(`/api/search?q=${encodeURIComponent(searchTerm)}`)
+      // 使用当前 AbortController 的信号
+      const response = await fetch(`/api/search?q=${encodeURIComponent(term)}`, {
+        signal: currentAbortController.signal
+      });
+
+      // 检查当前操作是否已被更新的请求取代
+      if (currentAbortController !== abortControllerRef.current) {
+        console.log('搜索请求已被新请求取代');
+        return;
+      }
 
       if (!response.ok) {
-        throw new Error(`搜索请求失败: ${response.status}`)
+        throw new Error(`搜索请求失败: ${response.status}`);
       }
 
       if (!response.body) {
-        throw new Error("响应没有数据")
       }
 
       // 创建一个读取器来处理流数据
-      const reader = response.body.getReader()
-      const decoder = new TextDecoder()
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
 
       // 临时保存结果的数组
-      let games: GameSearchResult[] = []
-      const receivedGames = new Map<number, GameSearchResult>()
+      let games: GameSearchResult[] = [];
+      const receivedGames = new Map<number, GameSearchResult>();
 
-      let done = false
-      let buffer = ""
+      let done = false;
+      let buffer = "";
+      let reachEnd = false;
 
+      // 流式处理部分不变，但添加检查确保当前控制器仍然有效
       while (!done) {
-        const { value, done: readerDone } = await reader.read()
-        done = readerDone
+        // 添加检查确保当前控制器仍然有效
+        if (currentAbortController !== abortControllerRef.current) {
+          console.log('流处理被新请求中断');
+          return;
+        }
+        
+        const { value, done: readerDone } = await reader.read();
+        done = readerDone;
 
         if (value) {
-          buffer += decoder.decode(value, { stream: true })
+          buffer += decoder.decode(value, { stream: true });
 
           // 处理缓冲区中的完整消息
-          const lines = buffer.split('\n')
-          // 保留最后一个可能不完整的行
-          buffer = lines.pop() || ""
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || ""; // 保留最后一个可能不完整的行
 
           for (const line of lines) {
-            if (!line.trim()) continue
+            if (!line.trim()) continue;
 
             try {
-              const data = JSON.parse(line)
+              const data = JSON.parse(line);
 
               switch (data.type) {
                 case "init":
-                  setSearchStatus(`找到 ${data.total} 个结果，正在加载封面...`)
-                  break
+                  // 保存服务端返回的总结果数量
+                  if (data.total !== undefined) {
+                    setTotalResults(data.total);
+                    setSearchStatus({ 
+                      state: 'searching', 
+                      message: `找到 ${data.total} 个结果，正在加载封面……` 
+                    });
+                  } else {
+                    setSearchStatus({ 
+                      state: 'searching', 
+                      message: `正在搜索……` 
+                    });
+                  }
+                  break;
 
                 case "gameStart":
                   // 游戏开始加载，添加到结果中（无图片）
-                  receivedGames.set(data.game.id, data.game)
-                  games = Array.from(receivedGames.values())
-                  setSearchResults([...games])
-                  break
+                  receivedGames.set(data.game.id, data.game);
+                  games = Array.from(receivedGames.values());
+                  setSearchResults([...games]);
+                  break;
 
                 case "gameComplete":
                   // 游戏加载完成（有图片），更新结果
-                  receivedGames.set(data.game.id, data.game)
-                  games = Array.from(receivedGames.values())
-                  setSearchResults([...games])
-                  break
+                  receivedGames.set(data.game.id, data.game);
+                  games = Array.from(receivedGames.values());
+                  setSearchResults([...games]);
+                  break;
 
                 case "gameError":
-                  console.error(`游戏 ${data.gameId} 加载失败:`, data.error)
-                  break
+                  console.error(`游戏 ${data.gameId} 加载失败:`, data.error);
+                  break;
 
                 case "error":
                   toast({
                     title: "搜索出错",
                     description: data.message,
                     variant: "destructive",
-                  })
-                  setSearchStatus("搜索失败")
-                  break
+                  });
+                  setSearchStatus({ state: 'error', message: data.message || "搜索失败" });
+                  break;
 
                 case "end":
-                  setSearchStatus(games.length > 0 ? "" : "未找到相关游戏")
-                  break
+                  reachEnd = true;
+                  if (games.length > 0) {
+                    setSearchStatus({ state: 'success', message: '' });
+                  } else {
+                    setSearchStatus({ 
+                      state: 'no-results', 
+                      message: data.message || "未找到相关游戏" 
+                    });
+                  }
+                  break;
               }
             } catch (error) {
-              console.error("解析响应数据失败:", error, line)
+              console.error("解析响应数据失败:", error, line);
             }
           }
         }
       }
 
+      // 如果流结束但没有收到end消息
+      if (!reachEnd) {
+        if (games.length > 0) {
+          setSearchStatus({ state: 'success', message: '' });
+        } else {
+          setSearchStatus({ state: 'no-results', message: "未找到相关游戏" });
+        }
+      }
+
     } catch (error) {
-      console.error("搜索游戏失败:", error)
+      // 检查是否是当前有效的搜索请求
+      if (currentAbortController !== abortControllerRef.current) {
+        console.log('搜索错误处理被跳过，因为已有新请求');
+        return;
+      }
+      
+      // 如果是用户取消的请求，不显示错误
+      if ((error as Error).name === 'AbortError') {
+        console.log('搜索请求被取消');
+        return;
+      }
+
+      console.error("搜索游戏失败:", error);
       toast({
         title: "搜索失败",
         description: typeof error === 'object' && error !== null && 'message' in error 
           ? (error as Error).message 
           : "无法获取游戏数据",
         variant: "destructive",
-      })
-      setSearchStatus("搜索失败")
+      });
+      
+      setSearchStatus({ 
+        state: 'error', 
+        message: "搜索失败，请检查网络连接后重试" 
+      });
     } finally {
-      setIsLoading(false)
+      // 只有在当前控制器仍然有效的情况下才清理状态
+      if (currentAbortController === abortControllerRef.current) {
+        clearTimeout(timeoutId);
+        setIsLoading(false);
+        
+        // 清除 AbortController 引用
+        abortControllerRef.current = null;
+      }
     }
   }
+
+  // 处理回车键搜索
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && !isLoading) {
+      searchGames();
+    } else if (e.key === 'Escape') {
+      onOpenChange(false);
+    }
+  }
+
+  // 渲染搜索状态UI
+  const renderSearchStatus = () => {
+    switch (searchStatus.state) {
+      case 'idle':
+        return (
+          <div className="flex flex-col items-center justify-center py-10 text-gray-500">
+            <Search className="h-12 w-12 mb-2 opacity-30" />
+            <p>{searchStatus.message}</p>
+          </div>
+        );
+      case 'searching':
+        return (
+          <div className="flex flex-col items-center justify-center py-10 text-gray-500">
+            <Loader2 className="h-8 w-8 mb-2 animate-spin" />
+            <p>{searchStatus.message}</p>
+          </div>
+        );
+      case 'error':
+        return (
+          <div className="flex flex-col items-center justify-center py-10 text-red-500">
+            <AlertCircle className="h-8 w-8 mb-2" />
+            <p>{searchStatus.message}</p>
+            <Button 
+              variant="outline" 
+              className="mt-4" 
+              onClick={() => searchGames(true)}
+              disabled={isLoading}
+            >
+              <RefreshCw className="mr-2 h-4 w-4" />
+              重试
+            </Button>
+          </div>
+        );
+      case 'no-results':
+        return (
+          <div className="flex flex-col items-center justify-center py-10 text-gray-500">
+            <Gamepad2 className="h-8 w-8 mb-2 opacity-50" />
+            <p>{searchStatus.message}</p>
+            <p className="text-sm mt-2">请尝试不同的关键词</p>
+          </div>
+        );
+      case 'success':
+        return null;
+      default:
+        return null;
+    }
+  };
+
+  // 组件卸载时清理
+  useEffect(() => {
+    return () => {
+      // 取消任何进行中的请求
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+    };
+  }, []);
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -137,14 +368,37 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame }: GameSea
           <DialogTitle>搜索游戏</DialogTitle>
         </DialogHeader>
         <div className="flex gap-2 mb-4">
-          <Input
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="输入游戏名称..."
-            onKeyDown={(e) => e.key === "Enter" && searchGames()}
-          />
-          <Button onClick={searchGames} disabled={isLoading}>
-            {isLoading ? "搜索中..." : "搜索"}
+          <div className="relative flex-1">
+            <Input
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="输入游戏名称..."
+              onKeyDown={handleKeyDown}
+              disabled={isLoading}
+              className="pr-8"
+            />
+            {searchTerm && (
+              <button 
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                onClick={handleClearSearch}
+                aria-label="清除搜索"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+          <Button onClick={() => searchGames()} disabled={isLoading || !searchTerm.trim()}>
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                搜索中
+              </>
+            ) : (
+              <>
+                <Search className="mr-2 h-4 w-4" />
+                搜索
+              </>
+            )}
           </Button>
         </div>
 
@@ -155,27 +409,40 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame }: GameSea
                 <div
                   key={game.id}
                   onClick={() => onSelectGame(game)}
-                  className="cursor-pointer border rounded p-2 hover:bg-gray-50"
+                  className="cursor-pointer border rounded p-2 hover:bg-gray-50 transition-colors"
+                  title={`选择 "${game.name}"`}
                 >
-                  {game.image ? (
-                    <div className="relative w-full h-0 pb-[133.33%] rounded overflow-hidden">
-                      <NextImage src={game.image} alt={game.name} fill className="object-cover" />
-                    </div>
-                  ) : (
-                    <div className="w-full h-0 pb-[133.33%] bg-gray-100 relative rounded">
+                  <div className="relative w-full h-0 pb-[133.33%] rounded overflow-hidden bg-gray-100">
+                    {game.image ? (
+                      <NextImage 
+                        src={game.image} 
+                        alt={game.name} 
+                        fill 
+                        className="object-cover"
+                        sizes="(max-width: 768px) 40vw, 20vw"
+                        loading="lazy"
+                      />
+                    ) : (
                       <div className="absolute inset-0 flex items-center justify-center">
                         <Gamepad2 className="w-8 h-8 text-gray-400" />
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                   <p className="text-sm truncate mt-2">{game.name}</p>
                 </div>
               ))}
             </div>
-          ) : searchStatus ? (
-            <p className="text-center py-4 text-gray-500">{searchStatus}</p>
-          ) : null}
+          ) : renderSearchStatus()}
         </div>
+        
+        <DialogFooter className="flex justify-between sm:justify-between border-t pt-2 mt-2">
+          <div className="text-xs text-gray-500">
+            {totalResults > 0 && `找到 ${totalResults} 个结果`}
+          </div>
+          <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>
+            关闭
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   )
