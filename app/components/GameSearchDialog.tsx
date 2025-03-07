@@ -51,7 +51,7 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame }: GameSea
       setIsLoading(false);
       setSearchStatus({ 
         state: searchResults.length > 0 ? 'success' : 'idle', 
-        message: searchResults.length > 0 ? '' : '输入游戏名称开始搜索' 
+        message: searchResults.length > 0 ? '' : '输入游戏名称开始搜索（建议使用英文名）' 
       });
     } else {
       // 关闭时取消正在进行的搜索请求
