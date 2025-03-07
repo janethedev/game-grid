@@ -67,7 +67,7 @@ export default function Home() {
         
         <div className="text-sm text-gray-500 mt-1 text-center">
           <p className="flex items-center justify-center mb-1">
-            <a className="text-blue-500" href="https://weibo.com/6571509464">苍旻白轮</a> made with Copilotpilot
+            <a className="text-blue-500 mr-1" href="https://weibo.com/6571509464">苍旻白轮</a> made with Copilot
             <a 
               href="https://github.com/SomiaWhiteRing/gamegrid" 
               target="_blank"
