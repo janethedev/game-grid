@@ -31,7 +31,7 @@ async function warmupConnection() {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-    await fetch("https://www.steamgriddb.com/api/v2/ping", {
+    await fetch("https://www.steamgriddb.com/api/v2/search/autocomplete/ping", {
       headers: { Authorization: `Bearer ${STEAMGRIDDB_API_KEY}` },
       method: "HEAD",
       signal: controller.signal

@@ -100,22 +100,62 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
   };
 
   // 选择游戏
-  const handleSelectGame = (game: GameSearchResult) => {
+  const handleSelectGame = async (game: GameSearchResult) => {
     if (selectedCellId === null) return;
+    
+    // 使用代理URL替换直接的外部URL
+    const proxyImageUrl = `/api/proxy?url=${encodeURIComponent(game.image)}`;
 
-    const updatedCell: GameCell = {
-      ...cells[selectedCellId],
-      image: game.image,
-      name: game.name,
-      imageObj: null,
-    };
-
-    setCells(cells.map((cell) => (cell.id === selectedCellId ? updatedCell : cell)));
-
-    // 保存到IndexedDB
-    saveToIndexedDB(updatedCell);
-
-    setIsSearchDialogOpen(false);
+    try {
+      // 先更新UI显示，让用户知道正在处理
+      const tempUpdatedCell: GameCell = {
+        ...cells[selectedCellId],
+        name: game.name,
+        image: proxyImageUrl, // 临时使用代理URL
+        imageObj: null,
+      };
+      
+      setCells(cells.map((cell) => (cell.id === selectedCellId ? tempUpdatedCell : cell)));
+      
+      // 关闭搜索对话框，不挡着后续的UI操作
+      setIsSearchDialogOpen(false);
+      
+      // 获取图片并转换为base64
+      const response = await fetch(proxyImageUrl);
+      const blob = await response.blob();
+      
+      // 将Blob转换为base64
+      const base64Url = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(blob);
+      });
+      
+      // 使用base64格式的URL更新cell
+      const finalUpdatedCell: GameCell = {
+        ...cells[selectedCellId],
+        image: base64Url,
+        name: game.name,
+        imageObj: null,
+      };
+      
+      setCells(cells.map((cell) => (cell.id === selectedCellId ? finalUpdatedCell : cell)));
+      
+      // 保存到IndexedDB
+      saveToIndexedDB(finalUpdatedCell);
+    } catch (error) {
+      console.error("转换图片为base64时出错:", error);
+      // 如果转换失败，使用原始代理URL作为fallback
+      const fallbackCell: GameCell = {
+        ...cells[selectedCellId],
+        image: proxyImageUrl,
+        name: game.name,
+        imageObj: null,
+      };
+      
+      setCells(cells.map((cell) => (cell.id === selectedCellId ? fallbackCell : cell)));
+      saveToIndexedDB(fallbackCell);
+    }
   };
 
   return (
