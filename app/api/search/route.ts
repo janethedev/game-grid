@@ -1,24 +1,8 @@
 import { NextResponse } from "next/server";
+import { isApiWarmedUp } from "../warmup/route";
 
 // 这里需要在Vercel上设置STEAMGRIDDB_API_KEY环境变量
 const STEAMGRIDDB_API_KEY = process.env.STEAMGRIDDB_API_KEY;
-
-// 在文件顶部，创建一个模块级别的初始化函数
-(async function warmupConnection() {
-  if (STEAMGRIDDB_API_KEY) {
-    try {
-      console.log("预热API连接...");
-      await fetch("https://www.steamgriddb.com/api/v2/ping", {
-        headers: { Authorization: `Bearer ${STEAMGRIDDB_API_KEY}` },
-        method: "HEAD",
-        // 不关心结果，只是为了建立连接
-      }).catch(() => { });
-      console.log("API连接预热完成");
-    } catch (e) {
-      // 忽略错误
-    }
-  }
-})();
 
 // 自定义 fetch 函数，包含重试逻辑
 async function fetchWithRetry(url: string, options: RequestInit, retries = 2, timeout = 8000, retryDelay = 1000) {
