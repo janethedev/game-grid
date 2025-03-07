@@ -1,38 +1,55 @@
-# GameGrid
+# GameGrid - 游戏生涯个人喜好表
 
-这是一个使用 [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app) 引导的 [Next.js](https://nextjs.org) 项目。
+GameGrid是一个简单的Web应用，让您可以创建和分享个人游戏喜好网格。通过简单的界面，您可以排列游戏，展示您的游戏品味。
 
-## 入门指南
+## 项目特点
 
-首先，运行开发服务器：
+- **个性化游戏网格**: 创建您独特的游戏排名表格
+- **搜索功能**: 快速查找并添加您喜爱的游戏
+- **分享功能**: 一键生成图片，展示您的游戏品味
+- **响应式设计**: 适配各种设备
+
+## 技术栈
+
+- [Next.js](https://nextjs.org/) - React框架
+- [React](https://reactjs.org/) - 用户界面库
+- [TypeScript](https://www.typescriptlang.org/) - 类型系统
+- [Tailwind CSS](https://tailwindcss.com/) - CSS框架
+
+## 快速开始
+
+克隆仓库并安装依赖项：
+
+```bash
+git clone https://github.com/yourusername/gamegrid.git
+cd gamegrid
+npm install
+```
+
+运行开发服务器：
 
 ```bash
 npm run dev
-# 或
-yarn dev
-# 或
-pnpm dev
-# 或
-bun dev
 ```
 
-使用浏览器打开 [http://localhost:3000](http://localhost:3000) 查看结果。
+访问 [http://localhost:3000](http://localhost:3000) 查看应用。
 
-您可以通过修改 `app/page.tsx` 开始编辑页面。当您编辑文件时，页面会自动更新。
+## 环境变量
 
-该项目使用 [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) 自动优化并加载 [Geist](https://vercel.com/font)，这是 Vercel 的一个新字体系列。
+创建`.env.local`文件，添加：
 
-## 了解更多
+```bash
+STEAMGRIDDB_API_KEY=your_api_key
+```
 
-要了解有关 Next.js 的更多信息，请查看以下资源：
+## 开发历程
 
-- [Next.js 文档](https://nextjs.org/docs) - 了解 Next.js 的功能和 API。
-- [学习 Next.js](https://nextjs.org/learn) - 一个互动式 Next.js 教程。
+本项目使用GitHub Copilot辅助开发，提高了开发效率和代码质量。
 
-您可以查看 [Next.js GitHub 仓库](https://github.com/vercel/next.js) - 欢迎您的反馈和贡献！
+## 致谢
 
-## 部署到 Vercel
+- 特别感谢[游戏生涯个人喜好表（已下线）](https://gamegrid.azurewebsites.net)项目的灵感，本项目是对该创意的致敬
 
-部署 Next.js 应用程序的最简单方法是使用来自 Next.js 创建者的 [Vercel 平台](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme)。
+## 许可证
 
-查看我们的 [Next.js 部署文档](https://nextjs.org/docs/app/building-your-application/deploying) 了解更多详情。
+MIT许可证 - 详情请参阅[LICENSE](LICENSE)文件
