@@ -15,6 +15,7 @@ interface UseCanvasEventsProps {
   openSearchDialog: (cellId: number) => void
   openTitleEditDialog: (cellId: number) => void
   openNameEditDialog: (cellId: number) => void
+  openMainTitleEditDialog: () => void
   forceCanvasRedraw?: () => void // 添加强制Canvas重绘的函数
 }
 
@@ -25,6 +26,8 @@ export function useCanvasEvents({
   openSearchDialog,
   openTitleEditDialog,
   openNameEditDialog,
+  openMainTitleEditDialog,
+  forceCanvasRedraw,
 }: UseCanvasEventsProps) {
   const [dragOverCellId, setDragOverCellId] = useState<number | null>(null)
 
@@ -37,6 +40,12 @@ export function useCanvasEvents({
     const rect = canvas.getBoundingClientRect();
     const x = (e.clientX - rect.left) / scale;
     const y = (e.clientY - rect.top) / scale;
+
+    // 检查是否点击了主标题区域
+    if (y < CANVAS_CONFIG.padding + CANVAS_CONFIG.titleHeight) {
+      openMainTitleEditDialog();
+      return;
+    }
 
     // 检查点击的是哪个单元格
     const cellId = getCellIdFromCoordinates(x, y, CANVAS_CONFIG);
@@ -73,10 +82,20 @@ export function useCanvasEvents({
 
     // 更新拖拽经过的单元格ID
     setDragOverCellId(cellId)
+    
+    // 强制重绘Canvas
+    if (forceCanvasRedraw) {
+      forceCanvasRedraw();
+    }
   }
 
   const handleDragLeave = () => {
     setDragOverCellId(null)
+    
+    // 强制重绘Canvas
+    if (forceCanvasRedraw) {
+      forceCanvasRedraw();
+    }
   }
 
   // 确保图片加载完成后重绘Canvas
@@ -101,6 +120,11 @@ export function useCanvasEvents({
 
     // 清除拖拽状态
     setDragOverCellId(null)
+    
+    // 强制重绘Canvas
+    if (forceCanvasRedraw) {
+      forceCanvasRedraw();
+    }
 
     if (cellId === null) return
 
@@ -186,9 +210,23 @@ export function useCanvasEvents({
       // 调用 toDataURL 会抛出安全错误。使用 try-catch 处理。
       const dataUrl = canvas.toDataURL("image/png")
 
+      // 获取主标题（从localStorage）
+      let fileName = "游戏生涯个人喜好表.png";
+      try {
+        const savedConfig = localStorage.getItem('gameGridGlobalConfig');
+        if (savedConfig) {
+          const parsedConfig = JSON.parse(savedConfig);
+          if (parsedConfig.mainTitle) {
+            fileName = `${parsedConfig.mainTitle}.png`;
+          }
+        }
+      } catch (error) {
+        console.error("获取主标题失败:", error);
+      }
+
       // 创建下载链接
       const link = document.createElement("a")
-      link.download = "游戏生涯个人喜好表.png"
+      link.download = fileName
       link.href = dataUrl
       link.click()
 

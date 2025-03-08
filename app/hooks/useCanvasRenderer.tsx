@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, RefObject } from "react"
-import { GameCell } from "../types"
+import { GameCell, GlobalConfig } from "../types"
 import { CANVAS_CONFIG, isBrowser } from "../constants"
 import { gamepadIconPath } from "../utils/canvas"
 
@@ -10,6 +10,7 @@ interface UseCanvasRendererProps {
   cells: GameCell[]
   setCells: React.Dispatch<React.SetStateAction<GameCell[]>>
   dragOverCellId: number | null
+  globalConfig: GlobalConfig
 }
 
 export function useCanvasRenderer({
@@ -17,6 +18,7 @@ export function useCanvasRenderer({
   cells,
   setCells,
   dragOverCellId,
+  globalConfig,
 }: UseCanvasRendererProps) {
   const [scale, setScale] = useState(1)
   const [canvasLoaded, setCanvasLoaded] = useState(false)
@@ -107,7 +109,7 @@ export function useCanvasRenderer({
       ctx.fillStyle = "black"
       ctx.font = `bold ${CANVAS_CONFIG.titleFontSize}px sans-serif`
       ctx.textAlign = "center"
-      ctx.fillText("游戏生涯个人喜好表", canvas.width / 2, CANVAS_CONFIG.padding + CANVAS_CONFIG.titleFontSize / 2)
+      ctx.fillText(globalConfig.mainTitle, canvas.width / 2, CANVAS_CONFIG.padding + CANVAS_CONFIG.titleFontSize / 2)
 
       // 计算网格区域
       const gridTop = CANVAS_CONFIG.padding + CANVAS_CONFIG.titleHeight
@@ -249,15 +251,40 @@ export function useCanvasRenderer({
       if (cmd.cmd === "beginPath") {
         ctx.beginPath();
       } else if (cmd.cmd === "roundRect" && cmd.args && typeof ctx.roundRect === 'function') {
-        ctx.roundRect(...cmd.args);
+        ctx.roundRect(
+          cmd.args[0] as number,
+          cmd.args[1] as number,
+          cmd.args[2] as number,
+          cmd.args[3] as number,
+          cmd.args[4] as number
+        );
       } else if (cmd.cmd === "arc" && cmd.args) {
-        ctx.arc(...cmd.args);
+        ctx.arc(
+          cmd.args[0] as number,
+          cmd.args[1] as number,
+          cmd.args[2] as number,
+          cmd.args[3] as number,
+          cmd.args[4] as number
+        );
       } else if (cmd.cmd === "moveTo" && cmd.args) {
-        ctx.moveTo(...cmd.args);
+        ctx.moveTo(
+          cmd.args[0] as number,
+          cmd.args[1] as number
+        );
       } else if (cmd.cmd === "lineTo" && cmd.args) {
-        ctx.lineTo(...cmd.args);
+        ctx.lineTo(
+          cmd.args[0] as number,
+          cmd.args[1] as number
+        );
       } else if (cmd.cmd === "bezierCurveTo" && cmd.args) {
-        ctx.bezierCurveTo(...cmd.args);
+        ctx.bezierCurveTo(
+          cmd.args[0] as number,
+          cmd.args[1] as number,
+          cmd.args[2] as number,
+          cmd.args[3] as number,
+          cmd.args[4] as number,
+          cmd.args[5] as number
+        );
       } else if (cmd.cmd === "closePath") {
         ctx.closePath();
       } else if (cmd.cmd === "fill") {

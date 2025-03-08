@@ -10,11 +10,18 @@ export interface GameCell {
 }
 
 /**
+ * 全局配置类型
+ */
+export interface GlobalConfig {
+  mainTitle: string;
+}
+
+/**
  * Canvas绘图命令类型
  */
 export interface DrawCommand {
   cmd: string;
-  args?: any[];
+  args?: unknown[];
 }
 
 /**

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { GameCell, GameSearchResult } from "../types"
+import { GameCell, GameSearchResult, GlobalConfig } from "../types"
 import { saveToIndexedDB } from "../utils/indexedDB"
 import { GameSearchDialog } from "./GameSearchDialog"
 import { TextEditDialog } from "./TextEditDialog"
@@ -19,10 +19,16 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [cells, setCells] = useState<GameCell[]>(initialCells)
   
+  // 全局配置状态
+  const [globalConfig, setGlobalConfig] = useState<GlobalConfig>({
+    mainTitle: "游戏生涯个人喜好表"
+  })
+  
   // 搜索与编辑状态
   const [isSearchDialogOpen, setIsSearchDialogOpen] = useState(false)
   const [isTitleDialogOpen, setIsTitleDialogOpen] = useState(false)
   const [isNameDialogOpen, setIsNameDialogOpen] = useState(false)
+  const [isMainTitleDialogOpen, setIsMainTitleDialogOpen] = useState(false)
   const [selectedCellId, setSelectedCellId] = useState<number | null>(null)
   const [editingText, setEditingText] = useState("")
   
@@ -52,24 +58,46 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
     setIsNameDialogOpen(true);
   };
 
-  // 使用自定义hooks管理Canvas渲染
-  const { dragOverCellId, handleCanvasClick, handleDragOver, handleDragLeave, handleDrop, generateImage } = 
-    useCanvasEvents({
-      cells,
-      setCells,
-      scale: useCanvasRenderer({ canvasRef, cells, setCells, dragOverCellId: null }).scale,
-      openSearchDialog,
-      openTitleEditDialog,
-      openNameEditDialog,
-    });
+  // 打开主标题编辑对话框
+  const openMainTitleEditDialog = () => {
+    setEditingText(globalConfig.mainTitle);
+    setIsMainTitleDialogOpen(true);
+  };
 
   // 使用自定义hooks处理Canvas渲染
-  const { scale } = useCanvasRenderer({ 
+  const { scale, drawCanvas } = useCanvasRenderer({ 
     canvasRef, 
     cells, 
     setCells, 
-    dragOverCellId 
+    dragOverCellId: null,
+    globalConfig
   });
+
+  // 使用自定义hooks管理Canvas渲染
+  const { 
+    dragOverCellId: currentDragOverCellId, 
+    handleCanvasClick, 
+    handleDragOver, 
+    handleDragLeave, 
+    handleDrop, 
+    generateImage 
+  } = useCanvasEvents({
+    cells,
+    setCells,
+    scale,
+    openSearchDialog,
+    openTitleEditDialog,
+    openNameEditDialog,
+    openMainTitleEditDialog,
+    forceCanvasRedraw: drawCanvas,
+  });
+
+  // 更新 useCanvasRenderer 以使用当前的 dragOverCellId
+  useEffect(() => {
+    if (drawCanvas) {
+      drawCanvas();
+    }
+  }, [currentDragOverCellId, drawCanvas]);
 
   // 保存标题更改
   const handleSaveTitle = (newText: string) => {
@@ -98,6 +126,50 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
     saveToIndexedDB(updatedCell);
     setIsNameDialogOpen(false);
   };
+
+  // 保存主标题更改
+  const handleSaveMainTitle = (newText: string) => {
+    const updatedConfig = {
+      ...globalConfig,
+      mainTitle: newText
+    };
+    
+    setGlobalConfig(updatedConfig);
+    setIsMainTitleDialogOpen(false);
+    
+    // 保存到localStorage
+    localStorage.setItem('gameGridGlobalConfig', JSON.stringify(updatedConfig));
+    
+    // 强制重绘画布
+    setTimeout(() => {
+      if (drawCanvas) {
+        drawCanvas();
+      }
+    }, 0);
+    
+    // 更新页面标题
+    if (typeof document !== 'undefined') {
+      document.title = newText;
+    }
+  };
+
+  // 加载全局配置
+  useEffect(() => {
+    const savedConfig = localStorage.getItem('gameGridGlobalConfig');
+    if (savedConfig) {
+      try {
+        const parsedConfig = JSON.parse(savedConfig);
+        setGlobalConfig(parsedConfig);
+        
+        // 更新页面标题
+        if (typeof document !== 'undefined' && parsedConfig.mainTitle) {
+          document.title = parsedConfig.mainTitle;
+        }
+      } catch (error) {
+        console.error("解析保存的全局配置失败:", error);
+      }
+    }
+  }, []);
 
   // 选择游戏
   const handleSelectGame = async (game: GameSearchResult) => {
@@ -175,14 +247,14 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
       />
 
       <p className="mt-4 text-sm text-gray-500">
-        提示：点击标题或游戏名称可以编辑文字，另外可以直接从桌面拖拽图片到格子中。
+        提示：点击顶部标题、格子标题或游戏名称可以编辑文字，另外可以直接从桌面拖拽图片到格子中。
       </p>
 
       <Button 
         onClick={() => generateImage(canvasRef)} 
         className="mt-6 px-8 py-3 text-lg bg-blue-600 hover:bg-blue-700"
       >
-        生成游戏生涯个人喜好表!
+        生成{globalConfig.mainTitle}!
       </Button>
 
       {/* 游戏搜索对话框 */}
@@ -208,6 +280,15 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
         title="编辑游戏名称"
         defaultValue={editingText}
         onSave={handleSaveName}
+      />
+
+      {/* 主标题编辑对话框 */}
+      <TextEditDialog
+        isOpen={isMainTitleDialogOpen}
+        onOpenChange={setIsMainTitleDialogOpen}
+        title="编辑主标题"
+        defaultValue={editingText}
+        onSave={handleSaveMainTitle}
       />
     </>
   )
