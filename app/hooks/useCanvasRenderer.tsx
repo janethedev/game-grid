@@ -23,72 +23,6 @@ export function useCanvasRenderer({
   const [scale, setScale] = useState(1)
   const [canvasLoaded, setCanvasLoaded] = useState(false)
 
-  // 计算Canvas缩放比例
-  useEffect(() => {
-    if (!isBrowser || !canvasRef.current) return;
-
-    const updateScale = () => {
-      if (!canvasRef.current) return;
-
-      const containerWidth = Math.min(window.innerWidth - 40, 1200);
-      const newScale = containerWidth / CANVAS_CONFIG.width;
-      setScale(newScale);
-
-      // 更新Canvas尺寸
-      const canvas = canvasRef.current;
-      canvas.style.width = `${CANVAS_CONFIG.width * newScale}px`;
-      canvas.style.height = `${CANVAS_CONFIG.height * newScale}px`;
-
-      // 保持Canvas的实际像素数
-      canvas.width = CANVAS_CONFIG.width;
-      canvas.height = CANVAS_CONFIG.height;
-
-      // 重新绘制
-      drawCanvas();
-    };
-
-    updateScale();
-    window.addEventListener("resize", updateScale);
-    setCanvasLoaded(true);
-
-    return () => window.removeEventListener("resize", updateScale);
-  }, []);
-
-  // 当cells变化时重新绘制Canvas
-  useEffect(() => {
-    if (canvasLoaded && isBrowser) {
-      drawCanvas();
-    }
-  }, [cells, canvasLoaded, dragOverCellId])
-
-  // 加载图片
-  useEffect(() => {
-    if (!isBrowser) return;
-
-    cells.forEach((cell, index) => {
-      if (cell.image && !cell.imageObj) {
-        try {
-          // 使用全局 window.Image 构造函数而不是直接使用 Image
-          const img = new window.Image();
-          img.crossOrigin = "anonymous";
-          img.onerror = (err) => {
-            console.error(`图片加载失败: ${cell.image}`, err);
-          };
-          img.onload = () => {
-            setCells((prev) => {
-              const newCells = [...prev];
-              newCells[index] = { ...newCells[index], imageObj: img };
-              return newCells;
-            });
-          };
-          img.src = cell.image;
-        } catch (error) {
-          console.error("创建图片对象失败:", error);
-        }
-      }
-    });
-  }, [cells, setCells]);
-
   // 绘制Canvas
   const drawCanvas = () => {
     const canvas = canvasRef.current
@@ -223,9 +157,91 @@ export function useCanvasRenderer({
         }
       })
     } catch (error) {
-      console.error("绘制Canvas时发生错误:", error);
+      console.error("绘制Canvas时发生错误:", error)
     }
   }
+
+  // 计算Canvas缩放比例
+  useEffect(() => {
+    if (!isBrowser || !canvasRef.current) return;
+
+    const updateScale = () => {
+      if (!canvasRef.current) return;
+
+      const containerWidth = Math.min(window.innerWidth - 40, 1200);
+      const newScale = containerWidth / CANVAS_CONFIG.width;
+      setScale(newScale);
+
+      // 更新Canvas尺寸
+      const canvas = canvasRef.current;
+      
+      // 保持Canvas的实际像素数
+      canvas.width = CANVAS_CONFIG.width;
+      canvas.height = CANVAS_CONFIG.height;
+      
+      // 设置显示尺寸
+      canvas.style.width = `${CANVAS_CONFIG.width * newScale}px`;
+      canvas.style.height = `${CANVAS_CONFIG.height * newScale}px`;
+
+      // 使用 requestAnimationFrame 确保在下一帧重绘
+      requestAnimationFrame(() => {
+        drawCanvas();
+      });
+    };
+
+    // 初始更新
+    updateScale();
+    
+    // 使用防抖处理窗口大小变化
+    let resizeTimeout: NodeJS.Timeout;
+    const handleResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(updateScale, 100);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      clearTimeout(resizeTimeout);
+    };
+  }, [drawCanvas]);
+
+  // 当cells变化时重新绘制Canvas
+  useEffect(() => {
+    if (canvasLoaded && isBrowser) {
+      requestAnimationFrame(() => {
+        drawCanvas();
+      });
+    }
+  }, [cells, canvasLoaded, dragOverCellId]);
+
+  // 加载图片
+  useEffect(() => {
+    if (!isBrowser) return;
+
+    cells.forEach((cell, index) => {
+      if (cell.image && !cell.imageObj) {
+        try {
+          // 使用全局 window.Image 构造函数而不是直接使用 Image
+          const img = new window.Image();
+          img.crossOrigin = "anonymous";
+          img.onerror = (err) => {
+            console.error(`图片加载失败: ${cell.image}`, err);
+          };
+          img.onload = () => {
+            setCells((prev) => {
+              const newCells = [...prev];
+              newCells[index] = { ...newCells[index], imageObj: img };
+              return newCells;
+            });
+          };
+          img.src = cell.image;
+        } catch (error) {
+          console.error("创建图片对象失败:", error);
+        }
+      }
+    });
+  }, [cells, setCells]);
 
   // 内部函数：绘制占位符
   function drawPlaceholder(

@@ -394,7 +394,7 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame }: GameSea
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="w-[95vw] max-h-[90vh] overflow-y-auto sm:max-w-md md:max-w-lg lg:max-w-xl">
         <DialogHeader>
           <DialogTitle>搜索游戏</DialogTitle>
         </DialogHeader>
@@ -482,14 +482,14 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame }: GameSea
           </div>
         </div>
 
-        <div className="max-h-[300px] overflow-y-auto">
+        <div className="max-h-[40vh] sm:max-h-[300px] md:max-h-[350px] lg:max-h-[400px] overflow-y-auto">
           {searchResults.length > 0 ? (
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
               {searchResults.map((game) => (
                 <div
                   key={game.id || game.name}
                   onClick={() => onSelectGame(game)}
-                  className="cursor-pointer border rounded p-2 hover:bg-gray-50 transition-colors"
+                  className="cursor-pointer border rounded p-1 sm:p-2 hover:bg-gray-50 transition-colors"
                   title={`选择 "${game.name}"`}
                 >
                   <div className="relative w-full h-0 pb-[133.33%] rounded overflow-hidden bg-gray-100">
@@ -508,15 +508,15 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame }: GameSea
                       </div>
                     )}
                   </div>
-                  <p className="text-sm truncate mt-2">{game.name}</p>
+                  <p className="text-xs sm:text-sm truncate mt-1 sm:mt-2">{game.name}</p>
                 </div>
               ))}
             </div>
           ) : renderSearchStatus()}
         </div>
         
-        <DialogFooter className="flex justify-between sm:justify-between border-t pt-2 mt-2">
-          <div className="text-xs text-gray-500">
+        <DialogFooter className="flex flex-col sm:flex-row justify-between sm:justify-between border-t pt-2 mt-2">
+          <div className="text-xs text-gray-500 mb-2 sm:mb-0">
             {totalResults > 0 && `找到 ${totalResults} 个结果`}
           </div>
           <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>

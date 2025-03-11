@@ -67,7 +67,10 @@ export default function Home() {
         
         <div className="text-sm text-gray-500 mt-1 text-center">
           <p className="flex items-center justify-center mb-1">
-            <a className="text-blue-500 mr-1" href="https://weibo.com/6571509464">苍旻白轮</a> made with Copilot 如果觉得对你有用请点→
+            <a className="text-blue-500 mr-1" href="https://weibo.com/6571509464/Phs2X0DIy">苍旻白轮</a> made with Copilot 
+            </p>
+            <p className="flex items-center justify-center mb-1">
+            如果觉得对你有用请点→
             <a 
               href="https://github.com/SomiaWhiteRing/gamegrid" 
               target="_blank"
@@ -79,10 +82,12 @@ export default function Home() {
                 alt="GitHub Stars" 
                 className="align-middle"
               />
-            </a> ！
+            </a>
           </p>
           <p className="flex items-center justify-center">
             Powered by SteamGridDB & Bangumi
+            </p>
+            <p className="flex items-center justify-center">
             <a 
               href="https://hits.sh/github.com/SomiaWhiteRing/gamegrid/"
               target="_blank" 
