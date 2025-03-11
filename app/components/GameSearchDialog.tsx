@@ -5,16 +5,28 @@ import NextImage from "next/image"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Gamepad2, Loader2, AlertCircle, Search, RefreshCw } from "lucide-react"
+import { Gamepad2, Loader2, AlertCircle, Search, RefreshCw, Info } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
 import { GameSearchResult } from "../types"
 import { preloadImage } from "../utils/canvasHelpers"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 interface GameSearchDialogProps {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
   onSelectGame: (game: GameSearchResult) => void
 }
+
+/**
+ * 搜索源类型
+ */
+type SearchSource = 'steamgriddb' | 'bangumi';
 
 /**
  * 搜索状态类型
@@ -37,6 +49,8 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame }: GameSea
   })
   // 添加状态来跟踪总结果数量
   const [totalResults, setTotalResults] = useState<number>(0)
+  // 添加搜索源状态
+  const [searchSource, setSearchSource] = useState<SearchSource>('bangumi')
   
   // 用于存储搜索请求的 AbortController，以便能取消进行中的请求
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -51,7 +65,7 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame }: GameSea
       setIsLoading(false);
       setSearchStatus({ 
         state: searchResults.length > 0 ? 'success' : 'idle', 
-        message: searchResults.length > 0 ? '' : '输入游戏名称开始搜索（建议使用英文名）' 
+        message: searchResults.length > 0 ? '' : "输入游戏名称开始搜索" 
       });
     } else {
       // 关闭时取消正在进行的搜索请求
@@ -78,8 +92,15 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame }: GameSea
     setSearchTerm('');
     setSearchResults([]);
     setTotalResults(0);
-    setSearchStatus({ state: 'idle', message: '输入游戏名称开始搜索' });
+    setSearchStatus({ state: 'idle', message: "输入游戏名称开始搜索" });
     lastSearchTermRef.current = '';
+  };
+
+  // 处理搜索源切换
+  const handleSearchSourceChange = (value: string) => {
+    setSearchSource(value as SearchSource);
+    // 切换搜索源时清空搜索结果
+    handleClearSearch();
   };
 
   // 搜索游戏 - 使用流式响应
@@ -129,8 +150,13 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame }: GameSea
     }, 3000);
 
     try {
+      // 根据搜索源选择不同的API端点
+      const apiEndpoint = searchSource === 'steamgriddb' 
+        ? `/api/search?q=${encodeURIComponent(term)}`
+        : `/api/bangumi-search?q=${encodeURIComponent(term)}`;
+      
       // 使用当前 AbortController 的信号
-      const response = await fetch(`/api/search?q=${encodeURIComponent(term)}`, {
+      const response = await fetch(apiEndpoint, {
         signal: currentAbortController.signal
       });
 
@@ -145,6 +171,7 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame }: GameSea
       }
 
       if (!response.body) {
+        throw new Error("响应没有正文");
       }
 
       // 创建一个读取器来处理流数据
@@ -153,7 +180,7 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame }: GameSea
 
       // 临时保存结果的数组
       let games: GameSearchResult[] = [];
-      const receivedGames = new Map<number, GameSearchResult>();
+      const receivedGames = new Map<string | number, GameSearchResult>();
 
       let done = false;
       let buffer = "";
@@ -202,14 +229,18 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame }: GameSea
 
                 case "gameStart":
                   // 游戏开始加载，添加到结果中（无图片）
-                  receivedGames.set(data.game.id, data.game);
+                  if (data.game.id !== undefined) {
+                    receivedGames.set(data.game.id, data.game);
+                  }
                   games = Array.from(receivedGames.values());
                   setSearchResults([...games]);
                   break;
 
                 case "gameComplete":
                   // 游戏加载完成（有图片），更新结果
-                  receivedGames.set(data.game.id, data.game);
+                  if (data.game.id !== undefined) {
+                    receivedGames.set(data.game.id, data.game);
+                  }
                   games = Array.from(receivedGames.values());
                   setSearchResults([...games]);
                   break;
@@ -309,7 +340,7 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame }: GameSea
         return (
           <div className="flex flex-col items-center justify-center py-10 text-gray-500">
             <Search className="h-12 w-12 mb-2 opacity-30" />
-            <p>{searchStatus.message}</p>
+            <p>{searchStatus.message || '输入游戏名称开始搜索'}</p>
           </div>
         );
       case 'searching':
@@ -367,39 +398,88 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame }: GameSea
         <DialogHeader>
           <DialogTitle>搜索游戏</DialogTitle>
         </DialogHeader>
-        <div className="flex gap-2 mb-4">
-          <div className="relative flex-1">
-            <Input
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="输入游戏名称..."
-              onKeyDown={handleKeyDown}
-              disabled={isLoading}
-              className="pr-8"
-            />
-            {searchTerm && (
-              <button 
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                onClick={handleClearSearch}
-                aria-label="清除搜索"
-              >
-                ✕
-              </button>
-            )}
+        
+        <div className="mb-4">
+          <div className="flex items-center mb-2">
+            <span className="text-sm text-gray-500 mr-2">搜索源：</span>
+            <Tabs defaultValue="steamgriddb" value={searchSource} onValueChange={handleSearchSourceChange} className="flex-1">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="bangumi" className="flex items-center justify-center gap-1">
+                  Bangumi
+                  <TooltipProvider delayDuration={0}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button 
+                          type="button" 
+                          className="inline-flex items-center justify-center"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Info className="h-4 w-4 text-gray-500 hover:text-gray-700" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Bangumi是一个专注于动画、游戏的中文数据库，对ACG相关游戏支持较好。</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </TabsTrigger>
+                <TabsTrigger value="steamgriddb" className="flex items-center justify-center gap-1">
+                  SteamGridDB
+                  <TooltipProvider delayDuration={0}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button 
+                          type="button" 
+                          className="inline-flex items-center justify-center"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Info className="h-4 w-4 text-gray-500 hover:text-gray-700" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>SteamGridDB是一个游戏封面数据库，收录了大量Steam及其他平台游戏的封面，但仅支持英文名搜索。</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
           </div>
-          <Button onClick={() => searchGames()} disabled={isLoading || !searchTerm.trim()}>
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                搜索中
-              </>
-            ) : (
-              <>
-                <Search className="mr-2 h-4 w-4" />
-                搜索
-              </>
-            )}
-          </Button>
+          
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Input
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="输入游戏名称开始搜索"
+                onKeyDown={handleKeyDown}
+                disabled={isLoading}
+                className="pr-8"
+              />
+              {searchTerm && (
+                <button 
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  onClick={handleClearSearch}
+                  aria-label="清除搜索"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+            <Button onClick={() => searchGames()} disabled={isLoading || !searchTerm.trim()}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  搜索中
+                </>
+              ) : (
+                <>
+                  <Search className="mr-2 h-4 w-4" />
+                  搜索
+                </>
+              )}
+            </Button>
+          </div>
         </div>
 
         <div className="max-h-[300px] overflow-y-auto">
@@ -407,7 +487,7 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame }: GameSea
             <div className="grid grid-cols-2 gap-2">
               {searchResults.map((game) => (
                 <div
-                  key={game.id}
+                  key={game.id || game.name}
                   onClick={() => onSelectGame(game)}
                   className="cursor-pointer border rounded p-2 hover:bg-gray-50 transition-colors"
                   title={`选择 "${game.name}"`}

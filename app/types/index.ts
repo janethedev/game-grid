@@ -2,11 +2,11 @@
  * 游戏格子类型定义
  */
 export interface GameCell {
-  id: number
-  title: string
-  image?: string
-  name?: string
-  imageObj?: HTMLImageElement | null
+  id: number;
+  title: string;
+  image?: string;
+  name?: string;
+  imageObj?: HTMLImageElement | null;
 }
 
 /**
@@ -50,8 +50,9 @@ export interface CanvasConfig {
  * 搜索游戏结果项
  */
 export interface GameSearchResult {
-  name: string
-  image: string
+  id?: number | string;
+  name: string;
+  image: string;
 }
 
 /**

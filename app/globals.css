@@ -105,3 +105,8 @@
   }
 }
 
+/* 全局禁用focus-visible */
+*:focus-visible {
+  outline: none !important;
+}
+

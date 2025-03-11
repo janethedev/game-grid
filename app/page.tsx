@@ -82,7 +82,7 @@ export default function Home() {
             </a>
           </p>
           <p className="flex items-center justify-center">
-            Powered by SteamGridDB
+            Powered by SteamGridDB & Bangumi
             <a 
               href="https://hits.sh/github.com/SomiaWhiteRing/gamegrid/"
               target="_blank" 
