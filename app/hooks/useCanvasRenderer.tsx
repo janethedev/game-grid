@@ -168,7 +168,7 @@ export function useCanvasRenderer({
     const updateScale = () => {
       if (!canvasRef.current) return;
 
-      const containerWidth = Math.min(window.innerWidth - 40, 1200);
+      const containerWidth = Math.min(window.innerWidth, 1200);
       const newScale = containerWidth / CANVAS_CONFIG.width;
       setScale(newScale);
 

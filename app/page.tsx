@@ -57,7 +57,7 @@ export default function Home() {
 
   return (
     <ToastProvider>
-      <main className="min-h-screen flex flex-col items-center py-8 px-4 relative">
+      <main className="min-h-screen flex flex-col items-center py-8 relative">
         {!loading && (
           <GameGrid 
             initialCells={cells} 

@@ -246,7 +246,7 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
         }}
       />
 
-      <p className="mt-4 text-sm text-gray-500">
+      <p className="mt-4 px-4 text-sm text-gray-500">
         提示：点击顶部标题、格子标题或游戏名称可以编辑文字，另外可以直接从桌面拖拽图片到格子中。
       </p>
 
