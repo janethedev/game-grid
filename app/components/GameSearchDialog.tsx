@@ -406,7 +406,7 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame }: GameSea
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="bangumi" className="flex items-center justify-center gap-1">
                   Bangumi
-                  <TooltipProvider delayDuration={0}>
+                  <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <button 
@@ -417,15 +417,15 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame }: GameSea
                           <Info className="h-4 w-4 text-gray-500 hover:text-gray-700" />
                         </button>
                       </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Bangumi是一个专注于动画、游戏的中文数据库，对ACG相关游戏支持较好。</p>
+                      <TooltipContent sideOffset={5} align="center">
+                        <p>Bangumi是一个专注于动画、游戏的中文数据库，<br />对ACG相关游戏支持较好。</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
                 </TabsTrigger>
                 <TabsTrigger value="steamgriddb" className="flex items-center justify-center gap-1">
                   SteamGridDB
-                  <TooltipProvider delayDuration={0}>
+                  <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <button 
@@ -436,8 +436,8 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame }: GameSea
                           <Info className="h-4 w-4 text-gray-500 hover:text-gray-700" />
                         </button>
                       </TooltipTrigger>
-                      <TooltipContent>
-                        <p>SteamGridDB是一个游戏封面数据库，收录了大量Steam及其他平台游戏的封面，但仅支持英文名搜索。</p>
+                      <TooltipContent sideOffset={5} align="center">
+                        <p>SteamGridDB是一个游戏封面数据库，<br />收录了大量Steam及其他平台游戏的封面，但仅支持英文名搜索。</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
