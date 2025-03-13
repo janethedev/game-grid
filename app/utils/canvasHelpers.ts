@@ -8,14 +8,8 @@ export function getClickArea(
   canvasConfig: typeof CANVAS_CONFIG
 ): "image" | "title" | "name" | null {
   // 获取网格区域基础信息
-  const {
-    padding,
-    titleHeight,
-    width,
-    height,
-    gridRows,
-    gridCols
-  } = canvasConfig;
+  const { padding, titleHeight, width, height, gridRows, gridCols } =
+    canvasConfig;
 
   // 计算网格区域
   const gridTop = padding + titleHeight;
@@ -44,9 +38,9 @@ export function getClickArea(
   }
 
   // 划分单元格内的三个区域
-  if (relY < cellHeight * 0.7) {
+  if (relY < cellHeight * 0.75) {
     return "image";
-  } else if (relY < cellHeight * 0.85) {
+  } else if (relY < cellHeight * 0.9) {
     return "title";
   } else {
     return "name";
@@ -92,8 +86,14 @@ export function cropImageToAspectRatio(imageUrl: string): Promise<string> {
       canvas.height = sourceHeight;
       ctx.drawImage(
         img,
-        sourceX, sourceY, sourceWidth, sourceHeight,
-        0, 0, sourceWidth, sourceHeight
+        sourceX,
+        sourceY,
+        sourceWidth,
+        sourceHeight,
+        0,
+        0,
+        sourceWidth,
+        sourceHeight
       );
 
       // 转换为DataURL

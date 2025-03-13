@@ -6,7 +6,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Gamepad2, Loader2, AlertCircle, Search, RefreshCw, Info } from "lucide-react"
-import { toast } from "@/hooks/use-toast"
 import { GameSearchResult } from "../types"
 import { preloadImage } from "../utils/canvasHelpers"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -250,11 +249,6 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame }: GameSea
                   break;
 
                 case "error":
-                  toast({
-                    title: "搜索出错",
-                    description: data.message,
-                    variant: "destructive",
-                  });
                   setSearchStatus({ state: 'error', message: data.message || "搜索失败" });
                   break;
 
@@ -300,13 +294,6 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame }: GameSea
       }
 
       console.error("搜索游戏失败:", error);
-      toast({
-        title: "搜索失败",
-        description: typeof error === 'object' && error !== null && 'message' in error 
-          ? (error as Error).message 
-          : "无法获取游戏数据",
-        variant: "destructive",
-      });
       
       setSearchStatus({ 
         state: 'error', 
@@ -409,13 +396,12 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame }: GameSea
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <button 
-                          type="button" 
-                          className="inline-flex items-center justify-center"
+                        <span 
+                          className="inline-flex items-center justify-center cursor-help"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <Info className="h-4 w-4 text-gray-500 hover:text-gray-700" />
-                        </button>
+                        </span>
                       </TooltipTrigger>
                       <TooltipContent sideOffset={5} align="center">
                         <p>Bangumi是一个专注于动画、游戏的中文数据库，<br />对ACG相关游戏支持较好。</p>
@@ -428,13 +414,12 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame }: GameSea
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <button 
-                          type="button" 
-                          className="inline-flex items-center justify-center"
+                        <span 
+                          className="inline-flex items-center justify-center cursor-help"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <Info className="h-4 w-4 text-gray-500 hover:text-gray-700" />
-                        </button>
+                        </span>
                       </TooltipTrigger>
                       <TooltipContent sideOffset={5} align="center">
                         <p>SteamGridDB是一个游戏封面数据库，<br />收录了大量Steam及其他平台游戏的封面，但仅支持英文名搜索。</p>

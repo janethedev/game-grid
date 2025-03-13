@@ -196,12 +196,48 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
       const response = await fetch(proxyImageUrl);
       const blob = await response.blob();
       
-      // 将Blob转换为base64
-      const base64Url = await new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result as string);
-        reader.readAsDataURL(blob);
+      // 创建图片对象进行裁切
+      const img = new Image();
+      img.src = URL.createObjectURL(blob);
+      await new Promise((resolve) => {
+        img.onload = resolve;
       });
+      
+      // 创建canvas进行裁切
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('无法获取canvas上下文');
+      
+      // 计算裁切尺寸
+      const targetRatio = 3/4;
+      const imgRatio = img.width / img.height;
+      let cropWidth = img.width;
+      let cropHeight = img.height;
+      let cropX = 0;
+      let cropY = 0;
+      
+      if (imgRatio > targetRatio) {
+        // 图片更宽，需要裁切宽度
+        cropWidth = img.height * targetRatio;
+        cropX = (img.width - cropWidth) / 2;
+      } else {
+        // 图片更高，需要裁切高度
+        cropHeight = img.width / targetRatio;
+        cropY = (img.height - cropHeight) / 2;
+      }
+      
+      // 设置canvas尺寸为裁切后的尺寸
+      canvas.width = cropWidth;
+      canvas.height = cropHeight;
+      
+      // 执行裁切
+      ctx.drawImage(img, cropX, cropY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
+      
+      // 将裁切后的图片转换为base64
+      const base64Url = canvas.toDataURL('image/jpeg', 0.9);
+      
+      // 清理资源
+      URL.revokeObjectURL(img.src);
       
       // 使用base64格式的URL更新cell
       const finalUpdatedCell: GameCell = {

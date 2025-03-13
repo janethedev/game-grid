@@ -5,7 +5,6 @@ import { GameCell } from "../types"
 import { CANVAS_CONFIG } from "../constants"
 import { getCellIdFromCoordinates } from "../utils/canvas"
 import { saveToIndexedDB } from "../utils/indexedDB"
-import { toast } from "@/components/use-toast"
 import { getClickArea, cropImageToAspectRatio } from "@/app/utils/canvasHelpers"
 
 interface UseCanvasEventsProps {
@@ -134,21 +133,11 @@ export function useCanvasEvents({
 
       // 检查是否是图片文件
       if (!file.type.startsWith("image/")) {
-        toast({
-          title: "错误",
-          description: "只能拖拽图片文件",
-          variant: "destructive",
-        })
+        console.error("只能拖拽图片文件");
         return
       }
 
       try {
-        // 显示加载中提示
-        toast({
-          title: "处理中",
-          description: "正在处理图片...",
-        })
-
         // 读取图片文件
         const originalImageUrl = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader()
@@ -185,17 +174,9 @@ export function useCanvasEvents({
         // 保存到IndexedDB
         await saveToIndexedDB(updatedCell)
 
-        toast({
-          title: "成功",
-          description: "图片已添加到格子中",
-        })
+        console.log("图片已添加到格子中");
       } catch (error) {
         console.error("读取或处理图片失败:", error)
-        toast({
-          title: "错误",
-          description: "读取或处理图片失败",
-          variant: "destructive",
-        })
       }
     }
   }
@@ -230,17 +211,9 @@ export function useCanvasEvents({
       link.href = dataUrl
       link.click()
 
-      toast({
-        title: "成功",
-        description: "图片已生成并下载",
-      })
+      console.log("图片已生成并下载");
     } catch (error) {
       console.error("生成图片失败:", error)
-      toast({
-        title: "错误",
-        description: "生成图片失败，可能是由于图片包含跨域资源。",
-        variant: "destructive",
-      })
     }
   }
 

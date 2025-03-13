@@ -101,7 +101,7 @@ async function processGame(
           detailUrl,
           {
             headers: {
-              "User-Agent": BANGUMI_USER_AGENT,
+              "User-Agent": BANGUMI_USER_AGENT || "GameGrid/1.0",
               Accept: "application/json",
               Authorization: `Bearer ${BANGUMI_ACCESS_TOKEN}`,
             },
@@ -202,7 +202,7 @@ export async function GET(request: Request) {
         try {
           const searchResponse = await fetchWithRetry(searchUrl, {
             headers: {
-              "User-Agent": BANGUMI_USER_AGENT,
+              "User-Agent": BANGUMI_USER_AGENT || "GameGrid/1.0",
               Accept: "application/json",
               Authorization: `Bearer ${BANGUMI_ACCESS_TOKEN}`,
             },
@@ -331,3 +331,4 @@ export async function GET(request: Request) {
     },
   });
 }
+

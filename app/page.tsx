@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ToastProvider } from "@/components/ui/toast"
 import { GameGrid } from "./components/GameGrid"
 import { GameCell } from "./types"
 import { CELL_TITLES } from "./constants"
@@ -56,54 +55,52 @@ export default function Home() {
   }
 
   return (
-    <ToastProvider>
-      <main className="min-h-screen flex flex-col items-center py-8 relative">
-        {!loading && (
-          <GameGrid 
-            initialCells={cells} 
-            onUpdateCells={handleUpdateCells} 
-          />
-        )}
-        
-        <div className="text-sm text-gray-500 mt-1 text-center">
+    <main className="min-h-screen flex flex-col items-center py-8 relative">
+      {!loading && (
+        <GameGrid 
+          initialCells={cells} 
+          onUpdateCells={handleUpdateCells} 
+        />
+      )}
+      
+      <div className="text-sm text-gray-500 mt-1 text-center">
+        <p className="flex items-center justify-center mb-1">
+          <a className="text-blue-500 mr-1" href="https://weibo.com/6571509464/Phs2X0DIy">苍旻白轮</a> made with Copilot 
+          </p>
           <p className="flex items-center justify-center mb-1">
-            <a className="text-blue-500 mr-1" href="https://weibo.com/6571509464/Phs2X0DIy">苍旻白轮</a> made with Copilot 
-            </p>
-            <p className="flex items-center justify-center mb-1">
-            如果觉得对你有用请点→
-            <a 
-              href="https://github.com/SomiaWhiteRing/gamegrid" 
-              target="_blank"
-              rel="noopener noreferrer"
-              className="ml-2 inline-flex items-center"
-            >
-              <img 
-                src="https://img.shields.io/github/stars/SomiaWhiteRing/gamegrid?style=social" 
-                alt="GitHub Stars" 
-                className="align-middle"
-              />
-            </a>
+          如果觉得对你有用请点→
+          <a 
+            href="https://github.com/SomiaWhiteRing/gamegrid" 
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ml-2 inline-flex items-center"
+          >
+            <img 
+              src="https://img.shields.io/github/stars/SomiaWhiteRing/gamegrid?style=social" 
+              alt="GitHub Stars" 
+              className="align-middle"
+            />
+          </a>
+        </p>
+        <p className="flex items-center justify-center">
+          Powered by SteamGridDB & Bangumi
           </p>
           <p className="flex items-center justify-center">
-            Powered by SteamGridDB & Bangumi
-            </p>
-            <p className="flex items-center justify-center">
-            <a 
-              href="https://hits.sh/github.com/SomiaWhiteRing/gamegrid/"
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="ml-2 inline-flex items-center"
-            >
-              <img 
-                src="https://hits.sh/github.com/SomiaWhiteRing/game-grid.svg?label=visitors&color=007ec6"
-                alt="Visitors Count"
-                className="align-middle"
-              />
-            </a>
-          </p>
-        </div>
-      </main>
-    </ToastProvider>
+          <a 
+            href="https://hits.sh/github.com/SomiaWhiteRing/gamegrid/"
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="ml-2 inline-flex items-center"
+          >
+            <img 
+              src="https://hits.sh/github.com/SomiaWhiteRing/game-grid.svg?label=visitors&color=007ec6"
+              alt="Visitors Count"
+              className="align-middle"
+            />
+          </a>
+        </p>
+      </div>
+    </main>
   )
 }
 
