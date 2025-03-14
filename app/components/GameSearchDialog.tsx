@@ -5,7 +5,7 @@ import NextImage from "next/image"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Gamepad2, Loader2, AlertCircle, Search, RefreshCw, Info } from "lucide-react"
+import { Gamepad2, Loader2, AlertCircle, Search, RefreshCw, Info, Upload } from "lucide-react"
 import { GameSearchResult } from "../types"
 import { preloadImage } from "../utils/canvasHelpers"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -20,6 +20,7 @@ interface GameSearchDialogProps {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
   onSelectGame: (game: GameSearchResult) => void
+  onUploadImage?: (file: File) => void
 }
 
 /**
@@ -38,7 +39,7 @@ type SearchStatus = {
 /**
  * 游戏搜索对话框组件
  */
-export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame }: GameSearchDialogProps) {
+export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame, onUploadImage }: GameSearchDialogProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [searchResults, setSearchResults] = useState<GameSearchResult[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -379,6 +380,15 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame }: GameSea
     };
   }, []);
 
+  // 添加文件上传处理函数
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && onUploadImage) {
+      onUploadImage(file);
+      onOpenChange(false); // 上传后关闭弹窗
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="w-[95vw] max-h-[90vh] overflow-y-auto sm:max-w-md md:max-w-lg lg:max-w-xl">
@@ -504,9 +514,34 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame }: GameSea
           <div className="text-xs text-gray-500 mb-2 sm:mb-0">
             {totalResults > 0 && `找到 ${totalResults} 个结果`}
           </div>
-          <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>
-            关闭
-          </Button>
+          <div className="flex gap-2 w-full sm:w-auto sm:justify-end">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => onOpenChange(false)}
+              className="flex-1 sm:flex-none"
+            >
+              关闭
+            </Button>
+            {onUploadImage && (
+              <div className="relative sm:hidden">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  id="image-upload"
+                />
+                <label
+                  htmlFor="image-upload"
+                  className="inline-flex items-center justify-center w-8 h-8 rounded bg-blue-500 hover:bg-blue-600 text-white cursor-pointer transition-colors"
+                  title="上传图片"
+                >
+                  <Upload className="h-4 w-4" />
+                </label>
+              </div>
+            )}
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

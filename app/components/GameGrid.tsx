@@ -266,6 +266,71 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
     }
   };
 
+  // 处理图片上传
+  const handleImageUpload = async (file: File) => {
+    if (selectedCellId === null) return;
+
+    try {
+      // 创建图片对象进行裁切
+      const img = new Image();
+      img.src = URL.createObjectURL(file);
+      await new Promise((resolve) => {
+        img.onload = resolve;
+      });
+      
+      // 创建canvas进行裁切
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('无法获取canvas上下文');
+      
+      // 计算裁切尺寸
+      const targetRatio = 3/4;
+      const imgRatio = img.width / img.height;
+      let cropWidth = img.width;
+      let cropHeight = img.height;
+      let cropX = 0;
+      let cropY = 0;
+
+      if (imgRatio > targetRatio) {
+        // 图片更宽，需要裁切宽度
+        cropWidth = img.height * targetRatio;
+        cropX = (img.width - cropWidth) / 2;
+      } else {
+        // 图片更高，需要裁切高度
+        cropHeight = img.width / targetRatio;
+        cropY = (img.height - cropHeight) / 2;
+      }
+
+      // 设置canvas尺寸为目标尺寸
+      canvas.width = 300; // 固定宽度
+      canvas.height = 400; // 固定高度
+
+      // 绘制裁切后的图片
+      ctx.drawImage(img, cropX, cropY, cropWidth, cropHeight, 0, 0, canvas.width, canvas.height);
+
+      // 转换为base64
+      const base64Image = canvas.toDataURL('image/jpeg', 0.8);
+
+      // 更新单元格
+      const updatedCell: GameCell = {
+        ...cells[selectedCellId],
+        image: base64Image,
+        imageObj: null,
+      };
+
+      setCells(cells.map((cell) => (cell.id === selectedCellId ? updatedCell : cell)));
+      saveToIndexedDB(updatedCell);
+
+      // 清理URL对象
+      URL.revokeObjectURL(img.src);
+
+      // 关闭搜索对话框
+      setIsSearchDialogOpen(false);
+    } catch (error) {
+      console.error('处理上传图片失败:', error);
+    }
+  };
+
   return (
     <>
       <canvas
@@ -298,6 +363,7 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
         isOpen={isSearchDialogOpen} 
         onOpenChange={setIsSearchDialogOpen} 
         onSelectGame={handleSelectGame}
+        onUploadImage={handleImageUpload}
       />
       
       {/* 标题编辑对话框 */}

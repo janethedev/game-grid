@@ -56,11 +56,20 @@ export function TextEditDialog({
             }}
           />
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+        <DialogFooter className="flex flex-row justify-between gap-2 sm:justify-end sm:flex-row">
+          <Button 
+            variant="outline" 
+            onClick={() => onOpenChange(false)}
+            className="flex-1 sm:flex-none"
+          >
             取消
           </Button>
-          <Button onClick={handleSave}>保存</Button>
+          <Button 
+            onClick={handleSave}
+            className="flex-1 sm:flex-none"
+          >
+            保存
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
