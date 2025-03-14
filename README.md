@@ -1,20 +1,15 @@
 # GameGrid - 游戏生涯个人喜好表
 
-GameGrid是一个简单的Web应用，让您可以创建和分享个人游戏喜好网格。通过简单的界面，您可以排列游戏，展示您的游戏品味。
+[示例图](screenshot/me.png)
 
-## 项目特点
+生成你自己的游戏生涯个人喜好表！
 
-- **个性化游戏网格**: 创建您独特的游戏排名表格
-- **多源搜索功能**: 支持从 SteamGridDB 和 Bangumi 搜索游戏封面
-- **分享功能**: 一键生成图片，展示您的游戏品味
-- **响应式设计**: 适配各种设备
+标题，名称，全部可以自由定义！
 
-## 技术栈
+## 欢迎Fork！
 
-- [Next.js](https://nextjs.org/) - React框架
-- [React](https://reactjs.org/) - 用户界面库
-- [TypeScript](https://www.typescriptlang.org/) - 类型系统
-- [Tailwind CSS](https://tailwindcss.com/) - CSS框架
+在遵守MIT License的前提下，欢迎自由的改写表格内容进行分发。  
+如果愿意，可以将自己创作的表格在[discussions](https://github.com/SomiaWhiteRing/gamegrid/discussions/2)中留言，我看到后会更新在readme里！
 
 ## 快速开始
 
@@ -66,8 +61,8 @@ BANGUMI_USER_AGENT=your_user_agent
 
 ## 致谢
 
-- 特别感谢[游戏生涯个人喜好表（已下线）](https://gamegrid.azurewebsites.net)项目的灵感，本项目是对该创意的致敬
-- 感谢 [SteamGridDB](https://www.steamgriddb.com/) 和 [Bangumi](https://bgm.tv/) 提供的API支持
+- 特别感谢[游戏生涯个人喜好表（已下线）](https://gamegrid.azurewebsites.net)项目的灵感，本项目是对该创意的致敬。
+- 感谢 [SteamGridDB](https://www.steamgriddb.com/) 和 [Bangumi](https://bgm.tv/) 提供的API支持。
 
 ## 许可证
 
