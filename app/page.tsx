@@ -87,7 +87,7 @@ export default function Home() {
           </p>
           <p className="flex items-center justify-center">
           <a 
-            href="https://hits.sh/github.com/SomiaWhiteRing/gamegrid/"
+            href="https://hits.sh/github.com/SomiaWhiteRing/game-grid/"
             target="_blank" 
             rel="noopener noreferrer"
             className="ml-2 inline-flex items-center"
