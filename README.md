@@ -1,6 +1,6 @@
 # GameGrid - 游戏生涯个人喜好表
 
-[示例图](screenshot/me.png)
+![示例图](screenshot/me.png)
 
 生成你自己的游戏生涯个人喜好表！
 
