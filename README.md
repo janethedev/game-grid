@@ -8,8 +8,8 @@
 
 ## 欢迎Fork！
 
-在遵守MIT License的前提下，欢迎自由的改写表格内容进行分发。  
-如果愿意，可以将自己创作的表格在[discussions](https://github.com/SomiaWhiteRing/gamegrid/discussions/2)中留言，我看到后会更新在readme里！
+在遵守MIT License的前提下，欢迎自由的改写表格内容或自定义数据源进行分发。  
+如果愿意，可以将自己创作的表格在[discussions](https://github.com/SomiaWhiteRing/gamegrid/discussions/2)中留言，我看到后会更新在项目主页！
 
 ## 快速开始
 
