@@ -162,7 +162,7 @@ export function useCanvasRenderer({
       ctx.font = "14px sans-serif"
       ctx.textAlign = "right"
       ctx.fillText(
-        "游戏生涯个人喜好表 - gamegrid.shatranj.space",
+        "gamegrid.shatranj.space",
         canvas.width - CANVAS_CONFIG.padding,
         canvas.height - CANVAS_CONFIG.padding / 2
       )
