@@ -156,6 +156,16 @@ export function useCanvasRenderer({
           )
         }
       })
+
+      // 添加水印
+      ctx.fillStyle = "#9ca3af" // 使用灰色
+      ctx.font = "14px sans-serif"
+      ctx.textAlign = "right"
+      ctx.fillText(
+        "游戏生涯个人喜好表 - gamegrid.shatranj.space",
+        canvas.width - CANVAS_CONFIG.padding,
+        canvas.height - CANVAS_CONFIG.padding / 2
+      )
     } catch (error) {
       console.error("绘制Canvas时发生错误:", error)
     }

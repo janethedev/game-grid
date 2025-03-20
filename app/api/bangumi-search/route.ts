@@ -326,7 +326,8 @@ export async function GET(request: Request) {
   return new Response(stream, {
     headers: {
       "Content-Type": "application/json",
-      "Cache-Control": "no-cache, no-transform",
+      "Cache-Control":
+        "public, max-age=3600, s-maxage=3600, stale-while-revalidate=7200",
       "X-Content-Type-Options": "nosniff",
     },
   });
