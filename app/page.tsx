@@ -84,8 +84,11 @@ export default function Home() {
         </p>
         <p className="flex items-center justify-center">
           Powered by SteamGridDB & Bangumi
-          </p>
-          <p className="flex items-center justify-center">
+        </p>
+        <p className="flex items-center justify-center">
+          新作(?)：<a className="text-blue-500" href="https://letsgrid.shatranj.space/">万能填表器</a>
+        </p>
+        <p className="flex items-center justify-center mt-1">
           <a 
             href="https://hits.sh/github.com/SomiaWhiteRing/game-grid/"
             target="_blank" 
