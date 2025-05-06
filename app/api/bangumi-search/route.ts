@@ -66,6 +66,9 @@ async function processGame(
   successCountRef: { value: number }
 ) {
   try {
+    // HTML entities workaround
+    game.name = game.name.replaceAll("&amp;", "&");
+
     console.log(`处理游戏: ${game.id} (${game.name})`);
 
     // 先发送游戏的基本信息，不含图片
