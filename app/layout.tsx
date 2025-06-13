@@ -10,6 +10,9 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "游戏生涯个人喜好表",
   description: "创建你的游戏生涯个人喜好表",
+  verification: {
+    google: "swtOMxSQC6Dfn-w4YtMQ3OFH4SZz00Blcd6FI0qMgJc",
+  },
 }
 
 export default function RootLayout({
