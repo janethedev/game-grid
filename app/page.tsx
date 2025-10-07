@@ -86,7 +86,7 @@ export default function Home() {
           Powered by SteamGridDB & Bangumi
         </p>
         <p className="flex items-center justify-center">
-          新作(?)：<a className="text-blue-500" href="https://letsgrid.shatranj.space/">万能填表器</a>
+          唯一指定链接：gamegrid.shatranj.space
         </p>
         <p className="flex items-center justify-center mt-1">
           <a 
