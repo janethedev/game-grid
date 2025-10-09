@@ -144,6 +144,7 @@ export function useCanvasRenderer({
         }
         // 以固定高度区域居中，确保不同字号的标题基线一致
         const titleTop = coverY + CANVAS_CONFIG.cellTitleMargin + coverHeight
+        // 使用固定槽位高度（基础字号），保证过长缩小时也垂直居中
         const titleAreaHeight = baseCellTitleFont
         const titleCenterY = titleTop + titleAreaHeight / 2
         const prevBaseline = ctx.textBaseline
@@ -151,12 +152,15 @@ export function useCanvasRenderer({
         ctx.fillText(
           cell.title,
           x + cellWidth / 2,
-          titleCenterY,
+          titleCenterY + 3,
         )
         ctx.textBaseline = prevBaseline
 
         // 如果有游戏名称，绘制游戏名称
         if (cell.name) {
+          // 副标题使用 alphabetic 基线，配合基于字号的 Y 计算，避免偏下
+          const prevBaseline2 = ctx.textBaseline
+          ctx.textBaseline = "alphabetic"
           ctx.fillStyle = "#4b5563" // 灰色文字
           ctx.font = `${CANVAS_CONFIG.cellNameFontSize}px sans-serif`
 
@@ -181,10 +185,11 @@ export function useCanvasRenderer({
             coverY +
               coverHeight +
               CANVAS_CONFIG.cellTitleMargin +
-              CANVAS_CONFIG.cellTitleFontSize +
+              baseCellTitleFont +
               CANVAS_CONFIG.cellNameMargin +
               CANVAS_CONFIG.cellNameFontSize,
           )
+          ctx.textBaseline = prevBaseline2
         }
       })
 
