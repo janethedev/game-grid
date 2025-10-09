@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:e2e": "playwright test",
+    "mcp:playwright": "node -e \"require('@playwright/mcp'); console.log('Playwright MCP loaded')\""
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.6",
@@ -25,6 +27,8 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
+    "@playwright/mcp": "^0.0.41",
+    "@playwright/test": "^1.56.0",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

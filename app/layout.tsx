@@ -20,14 +20,12 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  // Root is kept minimal; middleware redirects to /<locale> paths
   return (
     <html lang="zh-CN">
       <Analytics />
-        <ApiWarmer />
-      <body className={inter.className}>
-        {children}
-      </body>
+      <ApiWarmer />
+      <body className={inter.className}>{children}</body>
     </html>
   )
 }
-

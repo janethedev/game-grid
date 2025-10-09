@@ -57,7 +57,7 @@ BANGUMI_USER_AGENT=your_user_agent
 
 ## 开发历程
 
-本项目使用GitHub Copilot辅助开发，提高了开发效率和代码质量。
+本项目使用GitHub Copilot与Codex辅助开发，提高了开发效率和代码质量。
 
 ## 致谢
 

@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { useI18n } from "@/lib/i18n/provider"
 
 interface TextEditDialogProps {
   isOpen: boolean
@@ -26,6 +27,7 @@ export function TextEditDialog({
   defaultValue,
   onSave,
 }: TextEditDialogProps) {
+  const { t } = useI18n();
   const [text, setText] = useState(defaultValue)
 
   // 当对话框打开或默认值变化时更新文本
@@ -62,13 +64,13 @@ export function TextEditDialog({
             onClick={() => onOpenChange(false)}
             className="flex-1 sm:flex-none"
           >
-            取消
+            {t('common.cancel')}
           </Button>
           <Button 
             onClick={handleSave}
             className="flex-1 sm:flex-none"
           >
-            保存
+            {t('common.save')}
           </Button>
         </DialogFooter>
       </DialogContent>

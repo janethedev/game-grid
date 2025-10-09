@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
+import { useI18n } from "@/lib/i18n/provider"
 import { GameCell, GameSearchResult, GlobalConfig } from "../types"
 import { saveToIndexedDB } from "../utils/indexedDB"
 import { GameSearchDialog } from "./GameSearchDialog"
@@ -21,8 +22,31 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
   
   // 全局配置状态
   const [globalConfig, setGlobalConfig] = useState<GlobalConfig>({
-    mainTitle: "游戏生涯个人喜好表"
+    mainTitle: ""
   })
+  const { t, locale } = useI18n();
+
+  useEffect(() => {
+    // 每个语系独立的默认标题与存储键
+    const storageKey = `gameGridGlobalConfig_${locale}`
+    const savedConfig = typeof window !== 'undefined' ? localStorage.getItem(storageKey) : null
+    if (savedConfig) {
+      try {
+        const parsed = JSON.parse(savedConfig)
+        setGlobalConfig(parsed)
+        if (typeof document !== 'undefined' && parsed.mainTitle) {
+          document.title = parsed.mainTitle
+        }
+      } catch {}
+    } else {
+      const defaultTitle = String(t('global.main_title'))
+      setGlobalConfig((prev) => ({ ...prev, mainTitle: defaultTitle }))
+      if (typeof document !== 'undefined') {
+        document.title = defaultTitle
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locale])
   
   // 搜索与编辑状态
   const [isSearchDialogOpen, setIsSearchDialogOpen] = useState(false)
@@ -109,7 +133,14 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
     };
 
     setCells(cells.map((cell) => (cell.id === selectedCellId ? updatedCell : cell)));
-    saveToIndexedDB(updatedCell);
+    // 每个语系单独存储标题映射
+    try {
+      const key = `gameGridTitles_${locale}`
+      const raw = localStorage.getItem(key)
+      const map = raw ? (JSON.parse(raw) as Record<string, string>) : {}
+      map[String(selectedCellId)] = newText
+      localStorage.setItem(key, JSON.stringify(map))
+    } catch {}
     setIsTitleDialogOpen(false);
   };
 
@@ -138,7 +169,8 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
     setIsMainTitleDialogOpen(false);
     
     // 保存到localStorage
-    localStorage.setItem('gameGridGlobalConfig', JSON.stringify(updatedConfig));
+    const storageKey = `gameGridGlobalConfig_${locale}`
+    localStorage.setItem(storageKey, JSON.stringify(updatedConfig));
     
     // 强制重绘画布
     setTimeout(() => {
@@ -154,22 +186,19 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
   };
 
   // 加载全局配置
+  // 旧版存储迁移（如存在）
   useEffect(() => {
-    const savedConfig = localStorage.getItem('gameGridGlobalConfig');
-    if (savedConfig) {
+    const legacy = typeof window !== 'undefined' ? localStorage.getItem('gameGridGlobalConfig') : null
+    if (legacy) {
       try {
-        const parsedConfig = JSON.parse(savedConfig);
-        setGlobalConfig(parsedConfig);
-        
-        // 更新页面标题
-        if (typeof document !== 'undefined' && parsedConfig.mainTitle) {
-          document.title = parsedConfig.mainTitle;
-        }
-      } catch (error) {
-        console.error("解析保存的全局配置失败:", error);
-      }
+        const parsed = JSON.parse(legacy)
+        const storageKey = `gameGridGlobalConfig_${locale}`
+        localStorage.setItem(storageKey, JSON.stringify(parsed))
+        localStorage.removeItem('gameGridGlobalConfig')
+      } catch {}
     }
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locale])
 
   // 选择游戏
   const handleSelectGame = async (game: GameSearchResult) => {
@@ -347,15 +376,15 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
         }}
       />
 
-      <p className="mt-4 px-4 text-sm text-gray-500">
-        提示：点击顶部标题、格子标题或游戏名称可以编辑文字，另外可以直接从桌面拖拽图片到格子中。
+      <p className="mt-4 px-4 text-sm text-gray-500 break-words">
+        {t('ui.tip_edit')}
       </p>
 
       <Button 
         onClick={() => generateImage(canvasRef)} 
-        className="mt-6 px-8 py-3 text-lg bg-blue-600 hover:bg-blue-700"
+        className="mt-6 px-8 py-3 text-lg bg-blue-600 hover:bg-blue-700 whitespace-normal text-center"
       >
-        生成{globalConfig.mainTitle}!
+        {t('ui.generate', { title: globalConfig.mainTitle })}
       </Button>
 
       {/* 游戏搜索对话框 */}
@@ -370,7 +399,7 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
       <TextEditDialog
         isOpen={isTitleDialogOpen}
         onOpenChange={setIsTitleDialogOpen}
-        title="编辑标题"
+        title={String(t('dialog.edit_title'))}
         defaultValue={editingText}
         onSave={handleSaveTitle}
       />
@@ -379,7 +408,7 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
       <TextEditDialog
         isOpen={isNameDialogOpen}
         onOpenChange={setIsNameDialogOpen}
-        title="编辑游戏名称"
+        title={String(t('dialog.edit_game_name'))}
         defaultValue={editingText}
         onSave={handleSaveName}
       />
@@ -388,7 +417,7 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
       <TextEditDialog
         isOpen={isMainTitleDialogOpen}
         onOpenChange={setIsMainTitleDialogOpen}
-        title="编辑主标题"
+        title={String(t('dialog.edit_main_title'))}
         defaultValue={editingText}
         onSave={handleSaveMainTitle}
       />

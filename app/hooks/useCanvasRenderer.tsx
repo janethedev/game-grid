@@ -39,11 +39,25 @@ export function useCanvasRenderer({
       ctx.fillStyle = "white"
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-      // 绘制标题
+      // 绘制标题（自适应缩放过长文本）
       ctx.fillStyle = "black"
-      ctx.font = `bold ${CANVAS_CONFIG.titleFontSize}px sans-serif`
+      const baseFontSize = CANVAS_CONFIG.titleFontSize
+      ctx.font = `bold ${baseFontSize}px sans-serif`
       ctx.textAlign = "center"
-      ctx.fillText(globalConfig.mainTitle, canvas.width / 2, CANVAS_CONFIG.padding + CANVAS_CONFIG.titleFontSize / 2)
+      ctx.textBaseline = "middle"
+
+      const title = globalConfig.mainTitle || ""
+      const maxWidth = canvas.width - CANVAS_CONFIG.padding * 2
+      const metrics = ctx.measureText(title)
+      let fontSize = baseFontSize
+      if (metrics.width > maxWidth && metrics.width > 0) {
+        const scale = maxWidth / metrics.width
+        fontSize = Math.max(12, Math.floor(baseFontSize * scale))
+        ctx.font = `bold ${fontSize}px sans-serif`
+      }
+
+      const titleY = CANVAS_CONFIG.padding + CANVAS_CONFIG.titleHeight / 2
+      ctx.fillText(title, canvas.width / 2, titleY)
 
       // 计算网格区域
       const gridTop = CANVAS_CONFIG.padding + CANVAS_CONFIG.titleHeight
@@ -114,15 +128,32 @@ export function useCanvasRenderer({
           drawPlaceholder(ctx, coverX, coverY, coverWidth, coverHeight);
         }
 
-        // 绘制标题文字
+        // 绘制标题文字（自适应缩放 + 垂直居中）
         ctx.fillStyle = "black"
-        ctx.font = `${CANVAS_CONFIG.cellTitleFontSize}px sans-serif`
+        const baseCellTitleFont = CANVAS_CONFIG.cellTitleFontSize
+        ctx.font = `${baseCellTitleFont}px sans-serif`
         ctx.textAlign = "center"
+        // 允许的最大宽度（左右各留出 padding）
+        const cellTitleMaxWidth = cellWidth - CANVAS_CONFIG.cellPadding * 2
+        const cellTitleMetrics = ctx.measureText(cell.title)
+        let cellTitleFontSize = baseCellTitleFont
+        if (cellTitleMetrics.width > cellTitleMaxWidth && cellTitleMetrics.width > 0) {
+          const scale = cellTitleMaxWidth / cellTitleMetrics.width
+          cellTitleFontSize = Math.max(10, Math.floor(baseCellTitleFont * scale))
+          ctx.font = `${cellTitleFontSize}px sans-serif`
+        }
+        // 以固定高度区域居中，确保不同字号的标题基线一致
+        const titleTop = coverY + CANVAS_CONFIG.cellTitleMargin + coverHeight
+        const titleAreaHeight = baseCellTitleFont
+        const titleCenterY = titleTop + titleAreaHeight / 2
+        const prevBaseline = ctx.textBaseline
+        ctx.textBaseline = "middle"
         ctx.fillText(
           cell.title,
           x + cellWidth / 2,
-          coverY + coverHeight + CANVAS_CONFIG.cellTitleMargin + CANVAS_CONFIG.cellTitleFontSize,
+          titleCenterY,
         )
+        ctx.textBaseline = prevBaseline
 
         // 如果有游戏名称，绘制游戏名称
         if (cell.name) {

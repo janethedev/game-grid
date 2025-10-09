@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Gamepad2, Loader2, AlertCircle, Search, RefreshCw, Info, Upload } from "lucide-react"
 import { GameSearchResult } from "../types"
+import { useI18n } from "@/lib/i18n/provider"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Tooltip,
@@ -39,12 +40,13 @@ type SearchStatus = {
  * 游戏搜索对话框组件
  */
 export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame, onUploadImage }: GameSearchDialogProps) {
+  const { t } = useI18n();
   const [searchTerm, setSearchTerm] = useState("")
   const [searchResults, setSearchResults] = useState<GameSearchResult[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [searchStatus, setSearchStatus] = useState<SearchStatus>({ 
     state: 'idle', 
-    message: '输入游戏名称开始搜索（建议使用英文名）' 
+    message: String(t('search.idle_hint')) 
   })
   // 添加状态来跟踪总结果数量
   const [totalResults, setTotalResults] = useState<number>(0)
@@ -62,10 +64,7 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame, onUploadI
     if (isOpen) {
       // 仅在打开时重置状态，不重置搜索词和结果，以便用户可以继续之前的搜索
       setIsLoading(false);
-      setSearchStatus({ 
-        state: searchResults.length > 0 ? 'success' : 'idle', 
-        message: searchResults.length > 0 ? '' : "输入游戏名称开始搜索" 
-      });
+      setSearchStatus({ state: searchResults.length > 0 ? 'success' : 'idle', message: searchResults.length > 0 ? '' : String(t('search.idle_hint')) });
     } else {
       // 关闭时取消正在进行的搜索请求
       if (abortControllerRef.current) {
@@ -109,7 +108,7 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame, onUploadI
     
     // 检查搜索词是否为空
     if (!term) {
-      setSearchStatus({ state: 'idle', message: '请输入游戏名称' });
+      setSearchStatus({ state: 'idle', message: String(t('search.idle_hint')) });
       return;
     }
     
@@ -327,7 +326,7 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame, onUploadI
         return (
           <div className="flex flex-col items-center justify-center py-10 text-gray-500">
             <Search className="h-12 w-12 mb-2 opacity-30" />
-            <p>{searchStatus.message || '输入游戏名称开始搜索'}</p>
+            <p>{searchStatus.message || String(t('search.idle_hint'))}</p>
           </div>
         );
       case 'searching':
@@ -349,7 +348,7 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame, onUploadI
               disabled={isLoading}
             >
               <RefreshCw className="mr-2 h-4 w-4" />
-              重试
+              {t('search.retry')}
             </Button>
           </div>
         );
@@ -358,7 +357,7 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame, onUploadI
           <div className="flex flex-col items-center justify-center py-10 text-gray-500">
             <Gamepad2 className="h-8 w-8 mb-2 opacity-50" />
             <p>{searchStatus.message}</p>
-            <p className="text-sm mt-2">请尝试不同的关键词</p>
+            <p className="text-sm mt-2">{t('search.try_keywords')}</p>
           </div>
         );
       case 'success':
@@ -392,12 +391,12 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame, onUploadI
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="w-[95vw] max-h-[90vh] overflow-y-auto sm:max-w-md md:max-w-lg lg:max-w-xl">
         <DialogHeader>
-          <DialogTitle>搜索游戏</DialogTitle>
+          <DialogTitle>{t('search.title')}</DialogTitle>
         </DialogHeader>
         
         <div className="mb-4">
           <div className="flex items-center mb-2">
-            <span className="text-sm text-gray-500 mr-2">搜索源：</span>
+            <span className="text-sm text-gray-500 mr-2">{t('search.source')}</span>
             <Tabs defaultValue="steamgriddb" value={searchSource} onValueChange={handleSearchSourceChange} className="flex-1">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="bangumi" className="flex items-center justify-center gap-1">
@@ -413,7 +412,7 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame, onUploadI
                         </span>
                       </TooltipTrigger>
                       <TooltipContent sideOffset={5} align="center">
-                        <p>Bangumi是一个专注于动画、游戏的中文数据库，<br />对ACG相关游戏支持较好。</p>
+                        <p>{t('search.bangumi_tip')}</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -431,7 +430,7 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame, onUploadI
                         </span>
                       </TooltipTrigger>
                       <TooltipContent sideOffset={5} align="center">
-                        <p>SteamGridDB是一个游戏封面数据库，<br />收录了大量Steam及其他平台游戏的封面，但仅支持英文名搜索。</p>
+                        <p>{t('search.sgdb_tip')}</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -445,7 +444,7 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame, onUploadI
               <Input
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="输入游戏名称开始搜索"
+                placeholder={String(t('search.placeholder'))}
                 onKeyDown={handleKeyDown}
                 disabled={isLoading}
                 className="pr-8"
@@ -454,7 +453,7 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame, onUploadI
                 <button 
                   className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   onClick={handleClearSearch}
-                  aria-label="清除搜索"
+                  aria-label={String(t('search.clear'))}
                 >
                   ✕
                 </button>
@@ -464,12 +463,12 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame, onUploadI
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  搜索中
+                  {t('search.searching')}
                 </>
               ) : (
                 <>
                   <Search className="mr-2 h-4 w-4" />
-                  搜索
+                  {t('search.search')}
                 </>
               )}
             </Button>
@@ -484,7 +483,7 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame, onUploadI
                   key={game.id || game.name}
                   onClick={() => onSelectGame(game)}
                   className="cursor-pointer border rounded p-1 sm:p-2 hover:bg-gray-50 transition-colors"
-                  title={`选择 "${game.name}"`}
+                  title={`${game.name}`}
                 >
                   <div className="relative w-full h-0 pb-[133.33%] rounded overflow-hidden bg-gray-100">
                     {game.image ? (
@@ -511,7 +510,7 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame, onUploadI
         
         <DialogFooter className="flex flex-col sm:flex-row justify-between sm:justify-between border-t pt-2 mt-2">
           <div className="text-xs text-gray-500 mb-2 sm:mb-0">
-            {totalResults > 0 && `找到 ${totalResults} 个结果`}
+            {totalResults > 0 && String(t('search.results_count', { count: totalResults }))}
           </div>
           <div className="flex gap-2 w-full sm:w-auto sm:justify-end">
             <Button 
@@ -520,7 +519,7 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame, onUploadI
               onClick={() => onOpenChange(false)}
               className="flex-1 sm:flex-none"
             >
-              关闭
+              {t('common.close')}
             </Button>
             {onUploadImage && (
               <div className="relative sm:hidden">
@@ -534,7 +533,7 @@ export function GameSearchDialog({ isOpen, onOpenChange, onSelectGame, onUploadI
                 <label
                   htmlFor="image-upload"
                   className="inline-flex items-center justify-center w-8 h-8 rounded bg-blue-500 hover:bg-blue-600 text-white cursor-pointer transition-colors"
-                  title="上传图片"
+                  title={String(t('search.upload_image'))}
                 >
                   <Upload className="h-4 w-4" />
                 </label>
