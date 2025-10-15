@@ -12,6 +12,8 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/_next') ||
     pathname.startsWith('/api') ||
     pathname.startsWith('/assets') ||
+    pathname === '/robots.txt' ||
+    pathname === '/sitemap.xml' ||
     pathname.match(/\.(?:png|jpg|jpeg|gif|svg|webp|ico|css|js|map)$/)
   ) {
     return NextResponse.next();
@@ -31,7 +33,12 @@ export function middleware(request: NextRequest) {
     finalLocale = normalizeLocale(lang);
   }
 
-  const response = NextResponse.redirect(new URL(`/${finalLocale}${pathname}`, request.url));
+  const response = NextResponse.redirect(
+    new URL(`/${finalLocale}${pathname}`, request.url),
+    308
+  );
+  // Signal language-based variations for caches and crawlers
+  response.headers.set('Vary', 'Accept-Language');
   response.cookies.set(LOCALE_COOKIE, finalLocale, { path: '/', maxAge: 60 * 60 * 24 * 365 });
   return response;
 }
@@ -42,4 +49,3 @@ export const config = {
     '/((?!_next/|api/|assets/|.*\..*).*)',
   ],
 };
-

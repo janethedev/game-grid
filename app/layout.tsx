@@ -8,6 +8,8 @@ import "./globals.css"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
+  // Used to construct absolute canonical/alternate URLs
+  metadataBase: new URL("https://gamegrid.shatranj.space"),
   title: "游戏生涯个人喜好表",
   description: "创建你的游戏生涯个人喜好表",
   verification: {
@@ -23,9 +25,11 @@ export default function RootLayout({
   // Root is kept minimal; middleware redirects to /<locale> paths
   return (
     <html lang="zh-CN">
-      <Analytics />
-      <ApiWarmer />
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <Analytics />
+        <ApiWarmer />
+        {children}
+      </body>
     </html>
   )
 }
