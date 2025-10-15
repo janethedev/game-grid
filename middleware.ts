@@ -33,10 +33,8 @@ export function middleware(request: NextRequest) {
     finalLocale = normalizeLocale(lang);
   }
 
-  const response = NextResponse.redirect(
-    new URL(`/${finalLocale}${pathname}`, request.url),
-    308
-  );
+  const target = pathname === '/' ? `/${finalLocale}` : `/${finalLocale}${pathname}`;
+  const response = NextResponse.redirect(new URL(target, request.url), 308);
   // Signal language-based variations for caches and crawlers
   response.headers.set('Vary', 'Accept-Language');
   response.cookies.set(LOCALE_COOKIE, finalLocale, { path: '/', maxAge: 60 * 60 * 24 * 365 });

@@ -62,6 +62,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen flex flex-col items-center py-8 relative">
+
       {!loading && (
         <GameGrid initialCells={cells} onUpdateCells={handleUpdateCells} />
       )}
@@ -102,6 +103,75 @@ export default function Home() {
           </a>
         </p>
       </div>
+
+      {/* JSON-LD: WebApplication */}
+      {(() => {
+        const base = 'https://gamegrid.shatranj.space';
+        const url = `${base}/${locale}`;
+        const webAppLd: any = {
+          '@context': 'https://schema.org',
+          '@type': 'WebApplication',
+          name:
+            (typeof t('global.main_title') === 'string' && t('global.main_title')) ||
+            'Game Preference Grid',
+          url,
+          applicationCategory: 'EntertainmentApplication',
+          operatingSystem: 'Web',
+          inLanguage: locale,
+          description:
+            (typeof t('meta.description') === 'string' && t('meta.description')) ||
+            'Create your personal game preference grid',
+        };
+        if (locale.startsWith('zh')) {
+          webAppLd.alternateName = [
+            '游戏生涯喜好表',
+            '游戏生涯个人喜好表',
+            '游戏喜好表',
+            '游戏九宫格',
+            '游戏喜好九宫格',
+          ];
+        }
+        const faqLd = locale === 'zh-CN'
+          ? {
+              '@context': 'https://schema.org',
+              '@type': 'FAQPage',
+              mainEntity: [
+                {
+                  '@type': 'Question',
+                  name: '什么是游戏生涯喜好表（游戏喜好表）？',
+                  acceptedAnswer: {
+                    '@type': 'Answer',
+                    text:
+                      '一种用九宫格等布局展示你对不同维度「最爱、最惊艳、最治愈」等的游戏偏好，可导出分享。',
+                  },
+                },
+                {
+                  '@type': 'Question',
+                  name: '如何生成我的游戏生涯喜好表？',
+                  acceptedAnswer: {
+                    '@type': 'Answer',
+                    text:
+                      '在页面中点击格子标题或名称即可编辑，支持搜索封面或拖拽图片，完成后点击生成按钮导出图片。',
+                  },
+                },
+              ],
+            }
+          : null;
+        return (
+          <>
+            <script
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppLd) }}
+            />
+            {faqLd && (
+              <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
+              />
+            )}
+          </>
+        );
+      })()}
     </main>
   );
 }

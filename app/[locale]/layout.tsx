@@ -22,9 +22,21 @@ export async function generateMetadata({ params }: { params: { locale: Locale } 
   // Provide x-default to help Google understand the default locale
   languageAlternates['x-default'] = '/';
 
+  const keywords = locale.startsWith('zh')
+    ? [
+        '游戏生涯喜好表',
+        '游戏生涯个人喜好表',
+        '游戏喜好表',
+        '游戏九宫格',
+        '游戏喜好九宫格',
+        '喜好表生成器',
+      ]
+    : undefined;
+
   return {
     title: messages.meta?.title ?? 'GameGrid',
     description: messages.meta?.description ?? 'Create your game preference grid',
+    keywords,
     robots: {
       index: true,
       follow: true,
@@ -37,11 +49,13 @@ export async function generateMetadata({ params }: { params: { locale: Locale } 
       siteName: messages.global?.main_title ?? 'GameGrid',
       locale,
       alternateLocale: locales.filter((l) => l !== locale),
+      images: [`/${locale}/opengraph-image`],
     },
     twitter: {
-      card: 'summary',
+      card: 'summary_large_image',
       title: messages.meta?.title ?? 'GameGrid',
       description: messages.meta?.description ?? 'Create your game preference grid',
+      images: [`/${locale}/twitter-image`],
     },
     alternates: {
       canonical: `/${locale}`,

@@ -1,7 +1,7 @@
 const zhCN = {
   meta: {
-    title: '游戏生涯个人喜好表',
-    description: '创建你的游戏生涯个人喜好表',
+    title: '游戏生涯个人喜好表｜游戏喜好表生成器',
+    description: '创建你的游戏生涯喜好表（游戏喜好表/九宫格），支持多语言与自定义格子，一键导出高清图片。',
   },
   global: {
     main_title: '游戏生涯个人喜好表',
@@ -53,6 +53,10 @@ const zhCN = {
     powered_by: 'Powered by SteamGridDB & Bangumi',
     official_link: '唯一指定链接：gamegrid.shatranj.space',
   },
+  seo: {
+    intro:
+      '游戏生涯个人喜好表（也常称作“游戏生涯喜好表”、“游戏喜好表”、“游戏喜好九宫格”）在线生成器。支持多语言标题与自定义格子，拖拽或搜索添加封面，一键导出高分辨率图片。',
+  },
   search: {
     title: '搜索游戏',
     source: '搜索源：',
@@ -72,4 +76,3 @@ const zhCN = {
 };
 
 export default zhCN;
-
