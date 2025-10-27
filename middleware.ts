@@ -21,8 +21,20 @@ export function middleware(request: NextRequest) {
 
   // If path already includes a supported locale, continue
   const pathLocale = pathname.split('/')[1];
+  console.log('[Middleware] Raw pathLocale:', pathLocale);
+  console.log('[Middleware] Is valid locale?', locales.includes(pathLocale as any));
+  
   if (locales.includes(pathLocale as any)) {
     return NextResponse.next();
+  }
+  // Try to normalize the pathLocale in case it has extra characters
+  const normalizedPathLocale = normalizeLocale(pathLocale);
+  console.log('[Middleware] Normalized pathLocale:', normalizedPathLocale);
+  if (locales.includes(normalizedPathLocale)) {
+    console.log('[Middleware] Found valid locale after normalization, redirecting to clean path');
+    // Redirect to clean locale path
+    const cleanPath = pathname.replace(`/${pathLocale}`, `/${normalizedPathLocale}`);
+    return NextResponse.redirect(new URL(cleanPath, request.url), 308);
   }
 
   // Determine locale from cookie or Accept-Language

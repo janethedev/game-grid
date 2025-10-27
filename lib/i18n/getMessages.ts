@@ -4,8 +4,6 @@ export type Messages = Record<string, any>;
 
 export async function getMessages(locale: Locale): Promise<Messages> {
   switch (locale) {
-    case 'zh-CN':
-      return (await import('../../messages/zh-CN')).default;
     case 'zh-TW':
       return (await import('../../messages/zh-TW')).default;
     case 'ja':
@@ -31,8 +29,10 @@ export async function getMessages(locale: Locale): Promise<Messages> {
     case 'tr':
       return (await import('../../messages/tr')).default;
     case 'en':
-    default:
       return (await import('../../messages/en')).default;
+    case 'zh-CN':
+    default:
+      return (await import('../../messages/zh-CN')).default;
   }
 }
 
