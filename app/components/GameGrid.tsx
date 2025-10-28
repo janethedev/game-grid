@@ -121,7 +121,7 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
     if (drawCanvas) {
       drawCanvas();
     }
-  }, [currentDragOverCellId, drawCanvas]);
+  }, [currentDragOverCellId, globalConfig, drawCanvas]);
 
   // 保存标题更改
   const handleSaveTitle = (newText: string) => {
@@ -172,12 +172,12 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
     const storageKey = `gameGridGlobalConfig_${locale}`
     localStorage.setItem(storageKey, JSON.stringify(updatedConfig));
     
-    // 强制重绘画布
-    setTimeout(() => {
-      if (drawCanvas) {
-        drawCanvas();
-      }
-    }, 0);
+    // // 强制重绘画布
+    // setTimeout(() => {
+    //   if (drawCanvas) {
+    //     drawCanvas();
+    //   }
+    // }, 0);
     
     // 更新页面标题
     if (typeof document !== 'undefined') {
