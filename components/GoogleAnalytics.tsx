@@ -3,10 +3,10 @@
 import Script from 'next/script'
 
 export default function GoogleAnalytics() {
-  const GA_MEASUREMENT_ID = 'G-L60W8NEWQY'
+  const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_ID
   
-  // 仅在生产环境启用
-  if (process.env.NODE_ENV !== 'production') {
+  // 仅在生产环境且配置了 GA ID 时启用
+  if (process.env.NODE_ENV !== 'production' || !GA_MEASUREMENT_ID) {
     return null
   }
   
