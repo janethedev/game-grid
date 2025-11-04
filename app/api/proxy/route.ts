@@ -4,12 +4,38 @@ import { NextResponse } from "next/server";
 // Bangumi API User Agent
 const BANGUMI_USER_AGENT = process.env.BANGUMI_USER_AGENT;
 
+const ALLOWED_DOMAINS = [
+  "lain.bgm.tv",
+  "bgm.tv",
+  "steamgriddb.com",
+];
+
+function isUrlAllowed(url: string): boolean {
+  try {
+    const parsedUrl = new URL(url);
+    
+    if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
+      return false;
+    }
+    
+    return ALLOWED_DOMAINS.some(domain => 
+      parsedUrl.hostname === domain || parsedUrl.hostname.endsWith(`.${domain}`)
+    );
+  } catch {
+    return false;
+  }
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const imageUrl = searchParams.get("url");
 
   if (!imageUrl) {
     return new NextResponse("Missing URL parameter", { status: 400 });
+  }
+
+  if (!isUrlAllowed(imageUrl)) {
+    return new NextResponse("Invalid URL", { status: 403 });
   }
 
   try {
