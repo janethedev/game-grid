@@ -31,7 +31,7 @@ export async function GET(request: Request) {
       "Content-Type",
       response.headers.get("Content-Type") || "image/png"
     );
-    headers.set("Cache-Control", "public, max-age=31536000");
+    headers.set("Cache-Control", "public, max-age=31536000, s-maxage=31536000, stale-while-revalidate=86400");
 
     return new NextResponse(arrayBuffer, {
       headers,
