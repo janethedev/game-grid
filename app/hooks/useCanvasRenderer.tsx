@@ -195,7 +195,7 @@ export function useCanvasRenderer({
 
       // 添加水印
       ctx.fillStyle = "#9ca3af" // 使用灰色
-      ctx.font = "14px sans-serif"
+      ctx.font = "28px sans-serif" 
       ctx.textAlign = "right"
       ctx.fillText(
         "gamegrid.shatranj.space",
@@ -308,7 +308,7 @@ export function useCanvasRenderer({
     // 绘制游戏手柄图标
     ctx.fillStyle = "#9ca3af";
     ctx.strokeStyle = "#9ca3af";
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 6; 
     gamepadIconPath(iconX, iconY, iconSize).forEach((cmd) => {
       if (cmd.cmd === "beginPath") {
         ctx.beginPath();
