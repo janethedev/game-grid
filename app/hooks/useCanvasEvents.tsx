@@ -181,28 +181,85 @@ export function useCanvasEvents({
     }
   }
 
+  // 计算base64数据的文件大小（字节）
+  const getBase64Size = (base64String: string): number => {
+    // 移除data URL前缀
+    const base64Data = base64String.split(',')[1] || base64String;
+    // base64编码后的大小约为原始大小的4/3
+    const padding = (base64Data.match(/=/g) || []).length;
+    return (base64Data.length * 3) / 4 - padding;
+  }
+
   // 生成图片
   const generateImage = (canvasRef: React.RefObject<HTMLCanvasElement>) => {
     const canvas = canvasRef.current
     if (!canvas) return
 
     try {
-      // 在某些浏览器中，如果内容包含跨域资源且未正确设置 CORS，
-      // 调用 toDataURL 会抛出安全错误。使用 try-catch 处理。
-      const dataUrl = canvas.toDataURL("image/png")
+      const maxFileSize = 5 * 1024 * 1024; // 5MB
+      let dataUrl = "";
+      let fileName = "";
+      let fileSize = 0;
 
       // 获取主标题（从localStorage）
-      let fileName = "游戏生涯个人喜好表.png";
+      let baseFileName = "游戏生涯个人喜好表";
       try {
         const savedConfig = localStorage.getItem('gameGridGlobalConfig');
         if (savedConfig) {
           const parsedConfig = JSON.parse(savedConfig);
           if (parsedConfig.mainTitle) {
-            fileName = `${parsedConfig.mainTitle}.png`;
+            baseFileName = parsedConfig.mainTitle;
           }
         }
       } catch (error) {
         console.error("获取主标题失败:", error);
+      }
+
+      // 尝试不同的质量和格式，确保文件大小在5MB以内
+      // 首先尝试高质量JPEG（质量0.95）
+      dataUrl = canvas.toDataURL("image/jpeg", 0.95);
+      fileSize = getBase64Size(dataUrl);
+      console.log(`尝试JPEG质量0.95: ${(fileSize / 1024 / 1024).toFixed(2)}MB`);
+
+      if (fileSize <= maxFileSize) {
+        fileName = `${baseFileName}.jpg`;
+      } else {
+        // 如果太大，尝试质量0.9
+        dataUrl = canvas.toDataURL("image/jpeg", 0.9);
+        fileSize = getBase64Size(dataUrl);
+        console.log(`尝试JPEG质量0.9: ${(fileSize / 1024 / 1024).toFixed(2)}MB`);
+
+        if (fileSize <= maxFileSize) {
+          fileName = `${baseFileName}.jpg`;
+        } else {
+          // 如果还是太大，尝试质量0.85
+          dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+          fileSize = getBase64Size(dataUrl);
+          console.log(`尝试JPEG质量0.85: ${(fileSize / 1024 / 1024).toFixed(2)}MB`);
+
+          if (fileSize <= maxFileSize) {
+            fileName = `${baseFileName}.jpg`;
+          } else {
+            // 如果还是太大，尝试质量0.8
+            dataUrl = canvas.toDataURL("image/jpeg", 0.8);
+            fileSize = getBase64Size(dataUrl);
+            console.log(`尝试JPEG质量0.8: ${(fileSize / 1024 / 1024).toFixed(2)}MB`);
+
+            if (fileSize <= maxFileSize) {
+              fileName = `${baseFileName}.jpg`;
+            } else {
+              // 最后尝试质量0.75
+              dataUrl = canvas.toDataURL("image/jpeg", 0.75);
+              fileSize = getBase64Size(dataUrl);
+              console.log(`尝试JPEG质量0.75: ${(fileSize / 1024 / 1024).toFixed(2)}MB`);
+              fileName = `${baseFileName}.jpg`;
+              
+              if (fileSize > maxFileSize) {
+                console.warn(`警告：图片大小 ${(fileSize / 1024 / 1024).toFixed(2)}MB 超过了5MB限制`);
+              }
+            }
+          }
+        }
       }
 
       // 创建下载链接
@@ -211,7 +268,7 @@ export function useCanvasEvents({
       link.href = dataUrl
       link.click()
 
-      console.log("图片已生成并下载");
+      console.log(`图片已生成并下载: ${fileName}, 大小: ${(fileSize / 1024 / 1024).toFixed(2)}MB`);
     } catch (error) {
       console.error("生成图片失败:", error)
     }

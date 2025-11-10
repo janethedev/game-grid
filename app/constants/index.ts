@@ -7,24 +7,25 @@ export const isBrowser = typeof window !== 'undefined';
 
 /**
  * Canvas配置
+ * 使用2倍分辨率以提高导出图片的清晰度
  */
 export const CANVAS_CONFIG: CanvasConfig = {
-  width: 1200,
-  height: 1300,
-  padding: 40,
-  titleHeight: 50,
+  width: 2400,  
+  height: 2600, 
+  padding: 80,  
+  titleHeight: 100, 
   gridRows: 4,
   gridCols: 6,
-  cellPadding: 10,
-  cellBorderWidth: 2,
-  cellBorderRadius: 8,
+  cellPadding: 20, 
+  cellBorderWidth: 4, 
+  cellBorderRadius: 16, 
   cellAspectRatio: 0.75, // 宽高比为3:4
   coverRatio: 0.75, // 封面宽高比为3:4
-  titleFontSize: 48,
-  cellTitleFontSize: 22,
-  cellNameFontSize: 14,
-  cellTitleMargin: 6,
-  cellNameMargin: 6,
+  titleFontSize: 96, 
+  cellTitleFontSize: 44, 
+  cellNameFontSize: 28, 
+  cellTitleMargin: 12, 
+  cellNameMargin: 12, 
 };
 
 /**
@@ -67,23 +68,31 @@ export const CELL_TITLES = [
 ];
 
 // 添加 Canvas.roundRect polyfill，以兼容旧版浏览器
+interface BorderRadius {
+  tl: number;
+  tr: number;
+  br: number;
+  bl: number;
+}
+
 if (isBrowser && !CanvasRenderingContext2D.prototype.roundRect) {
-  CanvasRenderingContext2D.prototype.roundRect = function (x, y, width, height, radius) {
+  CanvasRenderingContext2D.prototype.roundRect = function (x: number, y: number, width: number, height: number, radius: number | BorderRadius | any) {
+    let r: BorderRadius;
     if (typeof radius === 'number') {
-      radius = { tl: radius, tr: radius, br: radius, bl: radius };
+      r = { tl: radius, tr: radius, br: radius, bl: radius };
     } else {
-      radius = { ...{ tl: 0, tr: 0, br: 0, bl: 0 }, ...radius };
+      r = { tl: 0, tr: 0, br: 0, bl: 0, ...radius };
     }
     this.beginPath();
-    this.moveTo(x + radius.tl, y);
-    this.lineTo(x + width - radius.tr, y);
-    this.quadraticCurveTo(x + width, y, x + width, y + radius.tr);
-    this.lineTo(x + width, y + height - radius.br);
-    this.quadraticCurveTo(x + width, y + height, x + width - radius.br, y + height);
-    this.lineTo(x + radius.bl, y + height);
-    this.quadraticCurveTo(x, y + height, x, y + height - radius.bl);
-    this.lineTo(x, y + radius.tl);
-    this.quadraticCurveTo(x, y, x + radius.tl, y);
+    this.moveTo(x + r.tl, y);
+    this.lineTo(x + width - r.tr, y);
+    this.quadraticCurveTo(x + width, y, x + width, y + r.tr);
+    this.lineTo(x + width, y + height - r.br);
+    this.quadraticCurveTo(x + width, y + height, x + width - r.br, y + height);
+    this.lineTo(x + r.bl, y + height);
+    this.quadraticCurveTo(x, y + height, x, y + height - r.bl);
+    this.lineTo(x, y + r.tl);
+    this.quadraticCurveTo(x, y, x + r.tl, y);
     this.closePath();
     return this;
   };
