@@ -86,6 +86,17 @@ export default function Home() {
             />
           </a>
         </p>
+        <p className="flex items-center justify-center mb-1">
+          {t('footer.friend_link')}
+          <a
+            href="https://moviegrid.dsdev.ink/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ml-1 text-blue-500 hover:underline"
+          >
+            {t('footer.friend_link_movie')}
+          </a>
+        </p>
         <p className="flex items-center justify-center">{t('footer.powered_by')}</p>
         <p className="flex items-center justify-center">{t('footer.official_link')}</p>
         <p className="flex items-center justify-center mt-1">

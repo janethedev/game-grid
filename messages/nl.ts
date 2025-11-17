@@ -33,6 +33,8 @@ const nl = {
   footer: {
     made_with: 'made with Copilot & Codex',
     if_useful_star: 'Handig? Geef een ster →',
+    friend_link: 'Vriendschapslink:',
+    friend_link_movie: 'Filmvoorkeurenraster',
     powered_by: 'Mede mogelijk gemaakt door SteamGridDB & Bangumi',
     official_link: 'Officiële link: gamegrid.shatranj.space',
   },

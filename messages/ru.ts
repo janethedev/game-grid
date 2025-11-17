@@ -33,6 +33,8 @@ const ru = {
   footer: {
     made_with: 'made with Copilot & Codex',
     if_useful_star: 'Полезно? Поставьте звезду →',
+    friend_link: 'Дружеская ссылка:',
+    friend_link_movie: 'Сетка кинопредпочтений',
     powered_by: 'При поддержке SteamGridDB и Bangumi',
     official_link: 'Официальная ссылка: gamegrid.shatranj.space',
   },

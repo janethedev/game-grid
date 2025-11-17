@@ -50,6 +50,8 @@ const zhCN = {
   footer: {
     made_with: 'made with Copilot & Codex',
     if_useful_star: '如果觉得对你有用请点 →',
+    friend_link: '友情链接：',
+    friend_link_movie: '电影生涯个人喜好表',
     powered_by: 'Powered by SteamGridDB & Bangumi',
     official_link: '唯一指定链接：gamegrid.shatranj.space',
   },

@@ -44,6 +44,8 @@ const ko = {
   footer: {
     made_with: 'made with Copilot & Codex',
     if_useful_star: '도움이 되었다면 스타 부탁드립니다 →',
+    friend_link: '우호 링크:',
+    friend_link_movie: '영화 취향 그리드',
     powered_by: 'Powered by SteamGridDB & Bangumi',
     official_link: '공식 링크: gamegrid.shatranj.space',
   },

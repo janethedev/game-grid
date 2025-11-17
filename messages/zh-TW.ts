@@ -46,6 +46,8 @@ const zhTW = {
   footer: {
     made_with: 'made with Copilot & Codex',
     if_useful_star: '如果覺得有幫助請點 →',
+    friend_link: '友情連結：',
+    friend_link_movie: '電影生涯個人喜好表',
     powered_by: 'Powered by SteamGridDB & Bangumi',
     official_link: '唯一指定連結：gamegrid.shatranj.space',
   },

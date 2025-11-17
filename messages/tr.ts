@@ -33,6 +33,8 @@ const tr = {
   footer: {
     made_with: 'made with Copilot & Codex',
     if_useful_star: 'İşe yaradıysa yıldız verin →',
+    friend_link: 'Arkadaş bağlantısı:',
+    friend_link_movie: 'Film tercih ızgarası',
     powered_by: 'SteamGridDB & Bangumi ile',
     official_link: 'Resmi bağlantı: gamegrid.shatranj.space',
   },

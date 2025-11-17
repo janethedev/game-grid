@@ -44,6 +44,8 @@ const ja = {
   footer: {
     made_with: 'made with Copilot & Codex',
     if_useful_star: '役に立ったらスターをお願いします →',
+    friend_link: '友情リンク:',
+    friend_link_movie: '映画嗜好グリッド',
     powered_by: 'Powered by SteamGridDB & Bangumi',
     official_link: '公式リンク: gamegrid.shatranj.space',
   },

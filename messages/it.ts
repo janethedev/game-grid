@@ -33,6 +33,8 @@ const it = {
   footer: {
     made_with: 'made with Copilot & Codex',
     if_useful_star: 'Utile? Metti una stella →',
+    friend_link: 'Link amico:',
+    friend_link_movie: 'Griglia di preferenze di film',
     powered_by: 'Con SteamGridDB & Bangumi',
     official_link: 'Link ufficiale: gamegrid.shatranj.space',
   },
