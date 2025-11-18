@@ -1,69 +1,122 @@
-"use client"
+"use client";
 
-import { useState, useRef, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { useI18n } from "@/lib/i18n/provider"
-import { GameCell, GameSearchResult, GlobalConfig } from "../types"
-import { saveToIndexedDB } from "../utils/indexedDB"
-import { GameSearchDialog } from "./GameSearchDialog"
-import { TextEditDialog } from "./TextEditDialog"
-import { useCanvasRenderer } from "../hooks/useCanvasRenderer"
-import { useCanvasEvents } from "../hooks/useCanvasEvents"
+import { useState, useRef, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { useI18n } from "@/lib/i18n/provider";
+import { trackEvent } from "@/lib/analytics";
+import { GameCell, GameSearchResult, GlobalConfig } from "../types";
+import { saveToIndexedDB } from "../utils/indexedDB";
+import { GameSearchDialog } from "./GameSearchDialog";
+import { TextEditDialog } from "./TextEditDialog";
+import { useCanvasRenderer } from "../hooks/useCanvasRenderer";
+import { useCanvasEvents } from "../hooks/useCanvasEvents";
+import { CANVAS_CONFIG } from "../constants";
 
 interface GameGridProps {
-  initialCells: GameCell[]
-  onUpdateCells: (cells: GameCell[]) => void
+  initialCells: GameCell[];
+  onUpdateCells: (cells: GameCell[]) => void;
+}
+
+function hasContent(cell: GameCell) {
+  return !!(cell.name || cell.image);
+}
+
+function getCellSlot(cellId: number) {
+  const row = Math.floor(cellId / CANVAS_CONFIG.gridCols) + 1;
+  const col = (cellId % CANVAS_CONFIG.gridCols) + 1;
+  return `${row}_${col}`;
+}
+
+function trackCellEditEvent(
+  prevCell: GameCell,
+  nextCell: GameCell,
+  locale: string,
+  t: (key: string) => any
+) {
+  const prevHas = hasContent(prevCell);
+  const nextHas = hasContent(nextCell);
+
+  let editType: "set" | "change" | "clear" | null = null;
+  if (!prevHas && nextHas) editType = "set";
+  else if (prevHas && nextHas) editType = "change";
+  else if (prevHas && !nextHas) editType = "clear";
+
+  if (!editType) return;
+
+  const defaultTitles = t("cell_titles") as string[];
+  const cellSlot = getCellSlot(nextCell.id);
+  const defaultTitle = defaultTitles[nextCell.id];
+  const isDefaultTitle = !!defaultTitle && nextCell.title === defaultTitle;
+
+  const cellLabel = isDefaultTitle
+    ? cellSlot
+    : (nextCell.title || "").slice(0, 80);
+
+  const gameName = nextCell.name
+    ? nextCell.name.slice(0, 80)
+    : nextCell.image
+      ? "__image_only__"
+      : "";
+
+  trackEvent("grid_cell_edit", {
+    grid_locale: locale,
+    grid_version: "v1",
+    cell_slot: cellSlot,
+    edit_type: editType,
+    cell_title_kind: isDefaultTitle ? "default" : "custom",
+    cell_label: cellLabel,
+    game_name: gameName,
+  });
 }
 
 export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
   // Canvas相关状态
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [cells, setCells] = useState<GameCell[]>(initialCells)
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [cells, setCells] = useState<GameCell[]>(initialCells);
   
   // 全局配置状态
   const [globalConfig, setGlobalConfig] = useState<GlobalConfig>({
     mainTitle: ""
-  })
+  });
   const { t, locale } = useI18n();
 
   useEffect(() => {
     // 每个语系独立的默认标题与存储键
-    const storageKey = `gameGridGlobalConfig_${locale}`
-    const savedConfig = typeof window !== 'undefined' ? localStorage.getItem(storageKey) : null
+    const storageKey = `gameGridGlobalConfig_${locale}`;
+    const savedConfig = typeof window !== "undefined" ? localStorage.getItem(storageKey) : null;
     if (savedConfig) {
       try {
-        const parsed = JSON.parse(savedConfig)
-        setGlobalConfig(parsed)
-        if (typeof document !== 'undefined' && parsed.mainTitle) {
-          document.title = parsed.mainTitle
+        const parsed = JSON.parse(savedConfig);
+        setGlobalConfig(parsed);
+        if (typeof document !== "undefined" && parsed.mainTitle) {
+          document.title = parsed.mainTitle;
         }
       } catch {}
     } else {
-      const defaultTitle = String(t('global.main_title'))
-      setGlobalConfig((prev) => ({ ...prev, mainTitle: defaultTitle }))
-      if (typeof document !== 'undefined') {
-        document.title = defaultTitle
+      const defaultTitle = String(t("global.main_title"));
+      setGlobalConfig((prev) => ({ ...prev, mainTitle: defaultTitle }));
+      if (typeof document !== "undefined") {
+        document.title = defaultTitle;
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [locale])
+  }, [locale]);
   
   // 搜索与编辑状态
-  const [isSearchDialogOpen, setIsSearchDialogOpen] = useState(false)
-  const [isTitleDialogOpen, setIsTitleDialogOpen] = useState(false)
-  const [isNameDialogOpen, setIsNameDialogOpen] = useState(false)
-  const [isMainTitleDialogOpen, setIsMainTitleDialogOpen] = useState(false)
-  const [selectedCellId, setSelectedCellId] = useState<number | null>(null)
-  const [editingText, setEditingText] = useState("")
+  const [isSearchDialogOpen, setIsSearchDialogOpen] = useState(false);
+  const [isTitleDialogOpen, setIsTitleDialogOpen] = useState(false);
+  const [isNameDialogOpen, setIsNameDialogOpen] = useState(false);
+  const [isMainTitleDialogOpen, setIsMainTitleDialogOpen] = useState(false);
+  const [selectedCellId, setSelectedCellId] = useState<number | null>(null);
+  const [editingText, setEditingText] = useState("");
   
   // 当cells状态发生变化时，通知父组件
   useEffect(() => {
-    onUpdateCells(cells)
-  }, [cells, onUpdateCells])
+    onUpdateCells(cells);
+  }, [cells, onUpdateCells]);
 
   // 打开搜索对话框
   const openSearchDialog = (cellId: number) => {
-    console.log("openSearchDialog")
     setSelectedCellId(cellId);
     setIsSearchDialogOpen(true);
   };
@@ -123,6 +176,51 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
     }
   }, [currentDragOverCellId, globalConfig, drawCanvas]);
 
+  const handleGenerate = () => {
+    const defaultTitles = t("cell_titles") as string[];
+    const totalCells = cells.length;
+    const filledCells = cells.filter((cell) => hasContent(cell));
+    const isDefaultMainTitle = globalConfig.mainTitle === String(t("global.main_title"));
+
+    trackEvent("grid_generated", {
+      grid_locale: locale,
+      grid_version: "v1",
+      grid_total_cells: totalCells,
+      grid_filled_cells: filledCells.length,
+      grid_title_kind: isDefaultMainTitle ? "default" : "custom",
+      grid_title: (globalConfig.mainTitle || "").slice(0, 80),
+    });
+
+    cells.forEach((cell) => {
+      if (!hasContent(cell)) return;
+
+      const cellSlot = getCellSlot(cell.id);
+      const defaultTitle = defaultTitles[cell.id];
+      const isDefaultTitle = !!defaultTitle && cell.title === defaultTitle;
+
+      const cellLabel = isDefaultTitle
+        ? cellSlot
+        : (cell.title || "").slice(0, 80);
+
+      const gameName = cell.name
+        ? cell.name.slice(0, 80)
+        : cell.image
+          ? "__image_only__"
+          : "";
+
+      trackEvent("grid_cell_snapshot", {
+        grid_locale: locale,
+        grid_version: "v1",
+        cell_slot: cellSlot,
+        cell_title_kind: isDefaultTitle ? "default" : "custom",
+        cell_label: cellLabel,
+        game_name: gameName,
+      });
+    });
+
+    generateImage(canvasRef);
+  };
+
   // 保存标题更改
   const handleSaveTitle = (newText: string) => {
     if (selectedCellId === null) return;
@@ -135,11 +233,11 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
     setCells(cells.map((cell) => (cell.id === selectedCellId ? updatedCell : cell)));
     // 每个语系单独存储标题映射
     try {
-      const key = `gameGridTitles_${locale}`
-      const raw = localStorage.getItem(key)
-      const map = raw ? (JSON.parse(raw) as Record<string, string>) : {}
-      map[String(selectedCellId)] = newText
-      localStorage.setItem(key, JSON.stringify(map))
+      const key = `gameGridTitles_${locale}`;
+      const raw = localStorage.getItem(key);
+      const map = raw ? (JSON.parse(raw) as Record<string, string>) : {};
+      map[String(selectedCellId)] = newText;
+      localStorage.setItem(key, JSON.stringify(map));
     } catch {}
     setIsTitleDialogOpen(false);
   };
@@ -148,12 +246,14 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
   const handleSaveName = (newText: string) => {
     if (selectedCellId === null) return;
 
+    const prevCell = cells[selectedCellId];
     const updatedCell: GameCell = {
-      ...cells[selectedCellId],
+      ...prevCell,
       name: newText,
     };
 
     setCells(cells.map((cell) => (cell.id === selectedCellId ? updatedCell : cell)));
+    trackCellEditEvent(prevCell, updatedCell, locale, t);
     saveToIndexedDB(updatedCell);
     setIsNameDialogOpen(false);
   };
@@ -169,18 +269,11 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
     setIsMainTitleDialogOpen(false);
     
     // 保存到localStorage
-    const storageKey = `gameGridGlobalConfig_${locale}`
+    const storageKey = `gameGridGlobalConfig_${locale}`;
     localStorage.setItem(storageKey, JSON.stringify(updatedConfig));
     
-    // // 强制重绘画布
-    // setTimeout(() => {
-    //   if (drawCanvas) {
-    //     drawCanvas();
-    //   }
-    // }, 0);
-    
     // 更新页面标题
-    if (typeof document !== 'undefined') {
+    if (typeof document !== "undefined") {
       document.title = newText;
     }
   };
@@ -188,21 +281,23 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
   // 加载全局配置
   // 旧版存储迁移（如存在）
   useEffect(() => {
-    const legacy = typeof window !== 'undefined' ? localStorage.getItem('gameGridGlobalConfig') : null
+    const legacy = typeof window !== "undefined" ? localStorage.getItem("gameGridGlobalConfig") : null;
     if (legacy) {
       try {
-        const parsed = JSON.parse(legacy)
-        const storageKey = `gameGridGlobalConfig_${locale}`
-        localStorage.setItem(storageKey, JSON.stringify(parsed))
-        localStorage.removeItem('gameGridGlobalConfig')
+        const parsed = JSON.parse(legacy);
+        const storageKey = `gameGridGlobalConfig_${locale}`;
+        localStorage.setItem(storageKey, JSON.stringify(parsed));
+        localStorage.removeItem("gameGridGlobalConfig");
       } catch {}
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [locale])
+  }, [locale]);
 
   // 选择游戏
   const handleSelectGame = async (game: GameSearchResult) => {
     if (selectedCellId === null) return;
+
+    const prevCell = cells[selectedCellId];
     
     // 使用代理URL替换直接的外部URL
     const proxyImageUrl = `/api/proxy?url=${encodeURIComponent(game.image)}`;
@@ -210,7 +305,7 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
     try {
       // 先更新UI显示，让用户知道正在处理
       const tempUpdatedCell: GameCell = {
-        ...cells[selectedCellId],
+        ...prevCell,
         name: game.name,
         image: proxyImageUrl, // 临时使用代理URL
         imageObj: null,
@@ -270,13 +365,14 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
       
       // 使用base64格式的URL更新cell
       const finalUpdatedCell: GameCell = {
-        ...cells[selectedCellId],
+        ...prevCell,
         image: base64Url,
         name: game.name,
         imageObj: null,
       };
       
       setCells(cells.map((cell) => (cell.id === selectedCellId ? finalUpdatedCell : cell)));
+      trackCellEditEvent(prevCell, finalUpdatedCell, locale, t);
       
       // 保存到IndexedDB
       saveToIndexedDB(finalUpdatedCell);
@@ -284,13 +380,14 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
       console.error("转换图片为base64时出错:", error);
       // 如果转换失败，使用原始代理URL作为fallback
       const fallbackCell: GameCell = {
-        ...cells[selectedCellId],
+        ...prevCell,
         image: proxyImageUrl,
         name: game.name,
         imageObj: null,
       };
       
       setCells(cells.map((cell) => (cell.id === selectedCellId ? fallbackCell : cell)));
+      trackCellEditEvent(prevCell, fallbackCell, locale, t);
       saveToIndexedDB(fallbackCell);
     }
   };
@@ -298,6 +395,8 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
   // 处理图片上传
   const handleImageUpload = async (file: File) => {
     if (selectedCellId === null) return;
+
+    const prevCell = cells[selectedCellId];
 
     try {
       // 创建图片对象进行裁切
@@ -342,12 +441,13 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
 
       // 更新单元格
       const updatedCell: GameCell = {
-        ...cells[selectedCellId],
+        ...prevCell,
         image: base64Image,
         imageObj: null,
       };
 
       setCells(cells.map((cell) => (cell.id === selectedCellId ? updatedCell : cell)));
+      trackCellEditEvent(prevCell, updatedCell, locale, t);
       saveToIndexedDB(updatedCell);
 
       // 清理URL对象
@@ -424,6 +524,3 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
     </>
   )
 }
-
-// 由于循环依赖问题，从常量文件导入CANVAS_CONFIG
-import { CANVAS_CONFIG } from "../constants";

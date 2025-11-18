@@ -1,11 +1,12 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { GameCell } from "../types"
-import { CANVAS_CONFIG } from "../constants"
-import { getCellIdFromCoordinates } from "../utils/canvas"
-import { saveToIndexedDB } from "../utils/indexedDB"
-import { getClickArea, cropImageToAspectRatio } from "@/app/utils/canvasHelpers"
+import { useState } from "react";
+import { trackEvent } from "@/lib/analytics";
+import { GameCell } from "../types";
+import { CANVAS_CONFIG } from "../constants";
+import { getCellIdFromCoordinates } from "../utils/canvas";
+import { saveToIndexedDB } from "../utils/indexedDB";
+import { getClickArea, cropImageToAspectRatio } from "@/app/utils/canvasHelpers";
 
 interface UseCanvasEventsProps {
   cells: GameCell[]
@@ -16,6 +17,46 @@ interface UseCanvasEventsProps {
   openNameEditDialog: (cellId: number) => void
   openMainTitleEditDialog: () => void
   forceCanvasRedraw?: () => void // 添加强制Canvas重绘的函数
+}
+
+function hasContent(cell: GameCell) {
+  return !!(cell.name || cell.image);
+}
+
+function getCellSlot(cellId: number) {
+  const row = Math.floor(cellId / CANVAS_CONFIG.gridCols) + 1;
+  const col = (cellId % CANVAS_CONFIG.gridCols) + 1;
+  return `${row}_${col}`;
+}
+
+function trackCellEditForDrag(prevCell: GameCell, nextCell: GameCell) {
+  const prevHas = hasContent(prevCell);
+  const nextHas = hasContent(nextCell);
+
+  let editType: "set" | "change" | "clear" | null = null;
+  if (!prevHas && nextHas) editType = "set";
+  else if (prevHas && nextHas) editType = "change";
+  else if (prevHas && !nextHas) editType = "clear";
+
+  if (!editType) return;
+
+  const cellSlot = getCellSlot(nextCell.id);
+
+  const gameName = nextCell.name
+    ? nextCell.name.slice(0, 80)
+    : nextCell.image
+      ? "__image_only__"
+      : "";
+
+  trackEvent("grid_cell_edit", {
+    grid_locale: "unknown",
+    grid_version: "v1",
+    cell_slot: cellSlot,
+    edit_type: editType,
+    cell_title_kind: "unknown",
+    cell_label: cellSlot,
+    game_name: gameName,
+  });
 }
 
 export function useCanvasEvents({
@@ -156,9 +197,11 @@ export function useCanvasEvents({
         // 这里我们添加一个时间戳参数，确保即使是相同的图片也会被认为是新的URL
         const uniqueImageUrl = `${croppedImageUrl}#t=${Date.now()}`;
 
+        const prevCell = cells[cellId];
+
         // 更新单元格数据
         const updatedCell: GameCell = {
-          ...cells[cellId],
+          ...prevCell,
           image: uniqueImageUrl,
           name: file.name.replace(/\.[^/.]+$/, ""), // 移除文件扩展名作为游戏名称
           imageObj: null, // 明确清除旧的图片对象
@@ -170,6 +213,8 @@ export function useCanvasEvents({
           newCells[cellId] = updatedCell
           return newCells
         })
+
+        trackCellEditForDrag(prevCell, updatedCell);
 
         // 保存到IndexedDB
         await saveToIndexedDB(updatedCell)
