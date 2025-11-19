@@ -481,7 +481,7 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
       </p>
 
       <Button 
-        onClick={() => generateImage(canvasRef)} 
+        onClick={handleGenerate} 
         className="mt-6 px-8 py-3 text-lg bg-blue-600 hover:bg-blue-700 whitespace-normal text-center"
       >
         {t('ui.generate', { title: globalConfig.mainTitle })}
