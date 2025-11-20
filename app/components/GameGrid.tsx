@@ -27,6 +27,15 @@ function getCellSlot(cellId: number) {
   return `${row}_${col}`;
 }
 
+function buildSignature(locale: string, mainTitle: string, cells: GameCell[]) {
+  const parts = cells.map((cell) => {
+    const hasImage = cell.image ? "1" : "0";
+    const name = cell.name || "";
+    return `${cell.id}:${cell.title}|${name}|${hasImage}`;
+  });
+  return `${locale}|${mainTitle}|${parts.join(";")}`;
+}
+
 function trackCellEditEvent(
   prevCell: GameCell,
   nextCell: GameCell,
@@ -73,6 +82,7 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
   // Canvas相关状态
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [cells, setCells] = useState<GameCell[]>(initialCells);
+  const lastSignatureRef = useRef<string | null>(null);
   
   // 全局配置状态
   const [globalConfig, setGlobalConfig] = useState<GlobalConfig>({
@@ -177,6 +187,14 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
   }, [currentDragOverCellId, globalConfig, drawCanvas]);
 
   const handleGenerate = () => {
+    const signature = buildSignature(locale, globalConfig.mainTitle, cells);
+    if (lastSignatureRef.current === signature) {
+      // 内容未变化，仅生成图片，不重复统计
+      generateImage(canvasRef);
+      return;
+    }
+    lastSignatureRef.current = signature;
+
     const defaultTitles = t("cell_titles") as string[];
     const totalCells = cells.length;
     const filledCells = cells.filter((cell) => hasContent(cell));
