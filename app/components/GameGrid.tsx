@@ -318,7 +318,11 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
     const prevCell = cells[selectedCellId];
     
     // 使用代理URL替换直接的外部URL
-    const proxyImageUrl = `/api/proxy?url=${encodeURIComponent(game.image)}`;
+    // const proxyImageUrl = `/api/proxy?url=${encodeURIComponent(game.image)}`;
+    
+    // 🟢 改用 wsrv.nl 公共代理
+    // &output=png 保证透明背景兼容，&w=400 限制尺寸节省用户流量
+    const proxyImageUrl = `https://wsrv.nl/?url=${encodeURIComponent(game.image)}&output=png&w=400&il`; 
 
     try {
       // 先更新UI显示，让用户知道正在处理
