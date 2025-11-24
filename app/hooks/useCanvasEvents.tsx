@@ -50,7 +50,7 @@ function trackCellEditForDrag(prevCell: GameCell, nextCell: GameCell) {
 
   trackEvent("grid_cell_edit", {
     grid_locale: "unknown",
-    grid_version: "v1",
+    grid_version: "v2",
     cell_slot: cellSlot,
     edit_type: editType,
     cell_title_kind: "unknown",

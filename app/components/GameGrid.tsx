@@ -69,7 +69,7 @@ function trackCellEditEvent(
 
   trackEvent("grid_cell_edit", {
     grid_locale: locale,
-    grid_version: "v1",
+    grid_version: "v2",
     cell_slot: cellSlot,
     edit_type: editType,
     cell_title_kind: isDefaultTitle ? "default" : "custom",
@@ -202,12 +202,15 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
 
     trackEvent("grid_generated", {
       grid_locale: locale,
-      grid_version: "v1",
+      grid_version: "v2",
       grid_total_cells: totalCells,
       grid_filled_cells: filledCells.length,
       grid_title_kind: isDefaultMainTitle ? "default" : "custom",
       grid_title: (globalConfig.mainTitle || "").slice(0, 80),
     });
+
+    const filledSlots: string[] = [];
+    const customTitleSlots: string[] = [];
 
     cells.forEach((cell) => {
       if (!hasContent(cell)) return;
@@ -216,24 +219,19 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
       const defaultTitle = defaultTitles[cell.id];
       const isDefaultTitle = !!defaultTitle && cell.title === defaultTitle;
 
-      const cellLabel = isDefaultTitle
-        ? cellSlot
-        : (cell.title || "").slice(0, 80);
+      filledSlots.push(cellSlot);
+      if (!isDefaultTitle) {
+        customTitleSlots.push(cellSlot);
+      }
+    });
 
-      const gameName = cell.name
-        ? cell.name.slice(0, 80)
-        : cell.image
-          ? "__image_only__"
-          : "";
-
-      trackEvent("grid_cell_snapshot", {
-        grid_locale: locale,
-        grid_version: "v1",
-        cell_slot: cellSlot,
-        cell_title_kind: isDefaultTitle ? "default" : "custom",
-        cell_label: cellLabel,
-        game_name: gameName,
-      });
+    trackEvent("grid_grid_snapshot_pack", {
+      grid_locale: locale,
+      grid_version: "v2",
+      grid_total_cells: totalCells,
+      grid_filled_cells: filledCells.length,
+      grid_filled_slots: filledSlots.join(","),
+      grid_custom_title_slots: customTitleSlots.join(","),
     });
 
     generateImage(canvasRef);
