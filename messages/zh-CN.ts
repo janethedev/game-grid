@@ -53,7 +53,24 @@ const zhCN = {
     friend_link: '友情链接：',
     friend_link_movie: '电影生涯个人喜好表',
     powered_by: 'Powered by SteamGridDB & Bangumi',
-    official_link: '唯一指定链接：gamegrid.shatranj.space',
+  },
+  legal: {
+    copyright_title: '版权声明',
+    privacy_title: '隐私协议',
+    copyright_p1:
+      '本网站为个人非商业项目，仅提供“游戏生涯个人喜好表”等图片生成工具，不提供任何游戏、影视、音乐、电子书等受版权保护作品的下载、在线播放或获取渠道。',
+    copyright_p2:
+      '页面中展示的游戏名称与封面等资料来自第三方接口（如 SteamGridDB、Bangumi），相关版权归原权利人所有，仅用于信息展示和个人喜好整理。如认为本站内容存在侵权或不当使用，请通过 GitHub 仓库 Issues 联系维护者，我们会尽快处理。',
+    copyright_p3:
+      '用户自行上传或拖拽到页面中的图片仅在浏览器本地处理与保存，不会上传到服务器；其版权由用户本人或原权利人享有，用户应确保其有权使用和分享该类图片。',
+    privacy_p1:
+      '本站不要求注册登录，编辑的格子内容与生成记录默认保存在浏览器的 localStorage / IndexedDB 中，仅在本地设备上使用。您可以通过清除浏览器数据的方式删除这些本地记录。',
+    privacy_p2:
+      '部署环境可能会记录常规服务端日志（如 IP 地址、User-Agent、访问时间和请求路径），仅用于安全、防滥用与性能排查，不用于识别特定个人。',
+    privacy_p3:
+      '在配置了 NEXT_PUBLIC_GA_ID 且处于生产环境时，本站会启用 Google Analytics 4，用于统计访问量和使用情况。相关数据由 Google 依据其隐私政策处理，您可以通过浏览器设置、广告拦截或禁用 JavaScript 等方式限制或拒绝此类统计。',
+    privacy_p4:
+      '本站可能同时使用托管服务提供方（如 Vercel）提供的基础监控与分析功能，这些数据仅用于改进站点稳定性和性能，不会出售或主动提供给其他第三方。',
   },
   seo: {
     intro:

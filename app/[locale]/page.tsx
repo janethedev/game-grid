@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useI18n } from '@/lib/i18n/provider';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger, DialogClose } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import { GameGrid } from '../components/GameGrid';
 import { GameCell } from '../types';
 import { loadCellsFromDB } from '../utils/indexedDB';
@@ -97,8 +99,54 @@ export default function Home() {
             {t('footer.friend_link_movie')}
           </a>
         </p>
-        <p className="flex items-center justify-center">{t('footer.powered_by')}</p>
-        <p className="flex items-center justify-center">{t('footer.official_link')}</p>
+        <p className="flex items-center justify-center mb-1">{t('footer.powered_by')}</p>
+        <div className="flex items-center justify-center gap-4 mb-1">
+          <Dialog>
+            <DialogTrigger asChild>
+              <button className="text-blue-500 hover:underline">
+                {t('legal.copyright_title')}
+              </button>
+            </DialogTrigger>
+            <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>{t('legal.copyright_title')}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-2 text-sm text-gray-600 text-left">
+                <p>{t('legal.copyright_p1')}</p>
+                <p>{t('legal.copyright_p2')}</p>
+                <p>{t('legal.copyright_p3')}</p>
+              </div>
+              <DialogFooter className="mt-4">
+                <DialogClose asChild>
+                  <Button variant="outline">{t('common.close')}</Button>
+                </DialogClose>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          <Dialog>
+            <DialogTrigger asChild>
+              <button className="text-blue-500 hover:underline">
+                {t('legal.privacy_title')}
+              </button>
+            </DialogTrigger>
+            <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>{t('legal.privacy_title')}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-2 text-sm text-gray-600 text-left">
+                <p>{t('legal.privacy_p1')}</p>
+                <p>{t('legal.privacy_p2')}</p>
+                <p>{t('legal.privacy_p3')}</p>
+                <p>{t('legal.privacy_p4')}</p>
+              </div>
+              <DialogFooter className="mt-4">
+                <DialogClose asChild>
+                  <Button variant="outline">{t('common.close')}</Button>
+                </DialogClose>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
         <p className="flex items-center justify-center mt-1">
           <a
             href="https://hits.sh/github.com/SomiaWhiteRing/game-grid/"
