@@ -29,7 +29,7 @@ const fr = {
   ],
   ui: { tip_edit: "Astuce : cliquez pour éditer. Vous pouvez aussi glisser-déposer des images.", generate: 'Générer {title} !' },
   dialog: { edit_title: 'Modifier le titre', edit_game_name: 'Modifier le nom du jeu', edit_main_title: 'Modifier le titre principal' },
-  common: { cancel: 'Annuler', save: 'Enregistrer', close: 'Fermer' },
+  common: { cancel: 'Annuler', save: 'Enregistrer', close: 'Fermer', confirm: 'Confirmer' },
   footer: {
     made_with: 'made with Copilot & Codex',
     if_useful_star: 'Utile ? Mettez une étoile →',
@@ -70,6 +70,18 @@ const fr = {
     upload_image: 'Téléverser une image',
     bangumi_tip: "Bangumi est une base de données chinoise axée sur l'anime et le jeu.",
     sgdb_tip: 'SteamGridDB est une base de couvertures (recherche en anglais).',
+  },
+  crop: {
+    title: 'Recadrer l\'image',
+    tip: 'Faites glisser et zoomez pour ajuster la zone de recadrage',
+    zoom: 'Zoom',
+  },
+  error: {
+    file_too_large: 'Le fichier image est trop volumineux, veuillez télécharger une image inférieure à {size}',
+    image_load_failed_retry: 'Échec du chargement de l\'image, veuillez réessayer',
+    image_load_failed_select_another: 'Échec du chargement de l\'image, réessayez ou sélectionnez une autre image',
+    loading: 'Chargement...',
+    processing: 'Traitement...',
   },
 };
 

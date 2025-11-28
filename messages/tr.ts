@@ -29,7 +29,7 @@ const tr = {
   ],
   ui: { tip_edit: 'İpucu: Düzenlemek için tıklayın. Görselleri hücrelere sürükleyin.', generate: '{title} oluştur!' },
   dialog: { edit_title: 'Başlığı düzenle', edit_game_name: 'Oyun adını düzenle', edit_main_title: 'Ana başlığı düzenle' },
-  common: { cancel: 'İptal', save: 'Kaydet', close: 'Kapat' },
+  common: { cancel: 'İptal', save: 'Kaydet', close: 'Kapat', confirm: 'Onayla' },
   footer: {
     made_with: 'made with Copilot & Codex',
     if_useful_star: 'İşe yaradıysa yıldız verin →',
@@ -70,6 +70,18 @@ const tr = {
     upload_image: 'Görsel yükle',
     bangumi_tip: 'Bangumi, anime ve oyun odaklı bir Çin veritabanıdır.',
     sgdb_tip: 'SteamGridDB kapak veritabanıdır (yalnızca İngilizce arama).',
+  },
+  crop: {
+    title: 'Görseli kırp',
+    tip: 'Kırpma alanını ayarlamak için sürükleyin ve yakınlaştırın',
+    zoom: 'Yakınlaştır',
+  },
+  error: {
+    file_too_large: 'Görsel dosyası çok büyük, lütfen {size} boyutundan küçük görseller yükleyin',
+    image_load_failed_retry: 'Görsel yüklenemedi, lütfen tekrar deneyin',
+    image_load_failed_select_another: 'Görsel yüklenemedi, tekrar deneyin veya başka bir görsel seçin',
+    loading: 'Yüklenıyor...',
+    processing: 'İşleniyor...',
   },
 };
 

@@ -29,7 +29,7 @@ const de = {
   ],
   ui: { tip_edit: 'Tipp: Klicken zum Bearbeiten. Bilder per Drag & Drop in Zellen.', generate: '{title} erzeugen!' },
   dialog: { edit_title: 'Titel bearbeiten', edit_game_name: 'Spielname bearbeiten', edit_main_title: 'Haupttitel bearbeiten' },
-  common: { cancel: 'Abbrechen', save: 'Speichern', close: 'Schließen' },
+  common: { cancel: 'Abbrechen', save: 'Speichern', close: 'Schließen', confirm: 'Bestätigen' },
   footer: {
     made_with: 'made with Copilot & Codex',
     if_useful_star: 'Nützlich? Bitte einen Stern →',
@@ -70,6 +70,18 @@ const de = {
     upload_image: 'Bild hochladen',
     bangumi_tip: 'Bangumi ist eine chinesische DB für Anime und Spiele.',
     sgdb_tip: 'SteamGridDB ist eine Cover-DB (nur englische Suche).',
+  },
+  crop: {
+    title: 'Bild zuschneiden',
+    tip: 'Ziehen und zoomen, um den Zuschnitt anzupassen',
+    zoom: 'Zoom',
+  },
+  error: {
+    file_too_large: 'Bilddatei zu groß, bitte Bilder kleiner als {size} hochladen',
+    image_load_failed_retry: 'Bild konnte nicht geladen werden, bitte erneut versuchen',
+    image_load_failed_select_another: 'Bild konnte nicht geladen werden, erneut versuchen oder anderes Bild wählen',
+    loading: 'Laden...',
+    processing: 'Verarbeitung...',
   },
 };
 

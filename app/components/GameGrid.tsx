@@ -8,6 +8,7 @@ import { GameCell, GameSearchResult, GlobalConfig } from "../types";
 import { saveToIndexedDB } from "../utils/indexedDB";
 import { GameSearchDialog } from "./GameSearchDialog";
 import { TextEditDialog } from "./TextEditDialog";
+import { ImageCropDialog } from "./ImageCropDialog";
 import { useCanvasRenderer } from "../hooks/useCanvasRenderer";
 import { useCanvasEvents } from "../hooks/useCanvasEvents";
 import { CANVAS_CONFIG } from "../constants";
@@ -117,8 +118,10 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
   const [isTitleDialogOpen, setIsTitleDialogOpen] = useState(false);
   const [isNameDialogOpen, setIsNameDialogOpen] = useState(false);
   const [isMainTitleDialogOpen, setIsMainTitleDialogOpen] = useState(false);
+  const [isCropDialogOpen, setIsCropDialogOpen] = useState(false);
   const [selectedCellId, setSelectedCellId] = useState<number | null>(null);
   const [editingText, setEditingText] = useState("");
+  const [uploadedImageSrc, setUploadedImageSrc] = useState<string | null>(null);
   
   // 当cells状态发生变化时，通知父组件
   useEffect(() => {
@@ -151,6 +154,54 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
     setIsMainTitleDialogOpen(true);
   };
 
+  // 处理拖拽图片 - 打开裁剪对话框
+  const handleImageDrop = async (cellId: number, file: File) => {
+    setSelectedCellId(cellId);
+    
+    // 限制图片大小为3MB
+    const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB
+    if (file.size > MAX_FILE_SIZE) {
+      alert(t('error.file_too_large', { size: '3MB' }) || '图片文件过大，请上传小于3MB的图片');
+      return;
+    }
+
+    try {
+      // 读取文件为 Data URL
+      const imageSrc = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const result = e.target?.result as string;
+          if (result) {
+            resolve(result);
+          } else {
+            reject(new Error('Failed to read image'));
+          }
+        };
+        reader.onerror = () => reject(new Error('Failed to read file'));
+        reader.readAsDataURL(file);
+      });
+
+      // 预加载图片以验证数据有效性
+      await new Promise<void>((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve();
+        img.onerror = () => reject(new Error('Invalid image format'));
+        img.src = imageSrc;
+      });
+
+      // 确保图片完全加载后再设置状态
+      setUploadedImageSrc(imageSrc);
+      
+      // 使用 setTimeout 确保状态更新后再打开对话框
+      setTimeout(() => {
+        setIsCropDialogOpen(true);
+      }, 100);
+    } catch (error) {
+      console.error('读取拖拽图片失败:', error);
+      alert(t('error.image_load_failed_select_another'));
+    }
+  };
+
   // 使用自定义hooks处理Canvas渲染
   const { scale, drawCanvas } = useCanvasRenderer({ 
     canvasRef, 
@@ -176,6 +227,7 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
     openTitleEditDialog,
     openNameEditDialog,
     openMainTitleEditDialog,
+    onImageDrop: handleImageDrop,
     forceCanvasRedraw: drawCanvas,
   });
 
@@ -412,57 +464,66 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
     }
   };
 
-  // 处理图片上传
+  // 处理图片上传 - 打开裁剪对话框
   const handleImageUpload = async (file: File) => {
+    if (selectedCellId === null) return;
+
+    // 限制图片大小为3MB
+    const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB
+    if (file.size > MAX_FILE_SIZE) {
+      alert(t('error.file_too_large', { size: '3MB' }) || '图片文件过大，请上传小于3MB的图片');
+      return;
+    }
+
+    try {
+      // 读取文件为 Data URL
+      const imageSrc = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const result = e.target?.result as string;
+          if (result) {
+            resolve(result);
+          } else {
+            reject(new Error('Failed to read image'));
+          }
+        };
+        reader.onerror = () => reject(new Error('Failed to read file'));
+        reader.readAsDataURL(file);
+      });
+
+      // 预加载图片以验证数据有效性
+      await new Promise<void>((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve();
+        img.onerror = () => reject(new Error('Invalid image format'));
+        img.src = imageSrc;
+      });
+
+      // 确保图片完全加载后再设置状态
+      setUploadedImageSrc(imageSrc);
+      setIsSearchDialogOpen(false); // 关闭搜索对话框
+      
+      // 使用 setTimeout 确保状态更新后再打开对话框
+      setTimeout(() => {
+        setIsCropDialogOpen(true);
+      }, 100);
+    } catch (error) {
+      console.error('读取上传图片失败:', error);
+      alert(t('error.image_load_failed_select_another'));
+    }
+  };
+
+  // 处理裁剪确认
+  const handleCropConfirm = async (croppedImageBase64: string) => {
     if (selectedCellId === null) return;
 
     const prevCell = cells[selectedCellId];
 
     try {
-      // 创建图片对象进行裁切
-      const img = new Image();
-      img.src = URL.createObjectURL(file);
-      await new Promise((resolve) => {
-        img.onload = resolve;
-      });
-      
-      // 创建canvas进行裁切
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      if (!ctx) throw new Error('无法获取canvas上下文');
-      
-      // 计算裁切尺寸
-      const targetRatio = 3/4;
-      const imgRatio = img.width / img.height;
-      let cropWidth = img.width;
-      let cropHeight = img.height;
-      let cropX = 0;
-      let cropY = 0;
-
-      if (imgRatio > targetRatio) {
-        // 图片更宽，需要裁切宽度
-        cropWidth = img.height * targetRatio;
-        cropX = (img.width - cropWidth) / 2;
-      } else {
-        // 图片更高，需要裁切高度
-        cropHeight = img.width / targetRatio;
-        cropY = (img.height - cropHeight) / 2;
-      }
-
-      // 设置canvas尺寸为目标尺寸
-      canvas.width = 300; // 固定宽度
-      canvas.height = 400; // 固定高度
-
-      // 绘制裁切后的图片
-      ctx.drawImage(img, cropX, cropY, cropWidth, cropHeight, 0, 0, canvas.width, canvas.height);
-
-      // 转换为base64
-      const base64Image = canvas.toDataURL('image/jpeg', 0.8);
-
       // 更新单元格
       const updatedCell: GameCell = {
         ...prevCell,
-        image: base64Image,
+        image: croppedImageBase64,
         imageObj: null,
       };
 
@@ -470,13 +531,10 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
       trackCellEditEvent(prevCell, updatedCell, locale, t);
       saveToIndexedDB(updatedCell);
 
-      // 清理URL对象
-      URL.revokeObjectURL(img.src);
-
-      // 关闭搜索对话框
-      setIsSearchDialogOpen(false);
+      // 清理状态
+      setUploadedImageSrc(null);
     } catch (error) {
-      console.error('处理上传图片失败:', error);
+      console.error('保存裁剪图片失败:', error);
     }
   };
 
@@ -540,6 +598,14 @@ export function GameGrid({ initialCells, onUpdateCells }: GameGridProps) {
         title={String(t('dialog.edit_main_title'))}
         defaultValue={editingText}
         onSave={handleSaveMainTitle}
+      />
+
+      {/* 图片裁剪对话框 */}
+      <ImageCropDialog
+        isOpen={isCropDialogOpen}
+        onOpenChange={setIsCropDialogOpen}
+        imageSrc={uploadedImageSrc}
+        onConfirm={handleCropConfirm}
       />
     </>
   )

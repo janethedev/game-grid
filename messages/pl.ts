@@ -29,7 +29,7 @@ const pl = {
   ],
   ui: { tip_edit: 'Wskazówka: kliknij, aby edytować. Przeciągnij obrazy do komórek.', generate: 'Generuj {title}!' },
   dialog: { edit_title: 'Edytuj tytuł', edit_game_name: 'Edytuj nazwę', edit_main_title: 'Edytuj tytuł główny' },
-  common: { cancel: 'Anuluj', save: 'Zapisz', close: 'Zamknij' },
+  common: { cancel: 'Anuluj', save: 'Zapisz', close: 'Zamknij', confirm: 'Potwierdź' },
   footer: {
     made_with: 'made with Copilot & Codex',
     if_useful_star: 'Przydatne? Daj gwiazdkę →',
@@ -70,6 +70,18 @@ const pl = {
     upload_image: 'Prześlij obraz',
     bangumi_tip: 'Bangumi to chińska baza danych o anime i grach.',
     sgdb_tip: 'SteamGridDB to baza okładek (wyszukiwanie po angielsku).',
+  },
+  crop: {
+    title: 'Przytnij obraz',
+    tip: 'Przeciągnij i przybliż, aby dostosować obszar przycinania',
+    zoom: 'Powiększenie',
+  },
+  error: {
+    file_too_large: 'Plik obrazu jest za duży, prześlij obrazy mniejsze niż {size}',
+    image_load_failed_retry: 'Nie udało się załadować obrazu, spróbuj ponownie',
+    image_load_failed_select_another: 'Nie udało się załadować obrazu, spróbuj ponownie lub wybierz inny obraz',
+    loading: 'Ładowanie...',
+    processing: 'Przetwarzanie...',
   },
 };
 
