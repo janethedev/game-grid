@@ -29,7 +29,7 @@ const nl = {
   ],
   ui: { tip_edit: 'Tip: klik om te bewerken. Sleep afbeeldingen naar cellen.', generate: 'Genereer {title}!' },
   dialog: { edit_title: 'Titel bewerken', edit_game_name: 'Spelnaam bewerken', edit_main_title: 'Hoofdtitel bewerken' },
-  common: { cancel: 'Annuleren', save: 'Opslaan', close: 'Sluiten' },
+  common: { cancel: 'Annuleren', save: 'Opslaan', close: 'Sluiten', confirm: 'Bevestigen' },
   footer: {
     made_with: 'made with Copilot & Codex',
     if_useful_star: 'Handig? Geef een ster →',
@@ -70,6 +70,18 @@ const nl = {
     upload_image: 'Afbeelding uploaden',
     bangumi_tip: 'Bangumi is een Chinese DB voor anime en games.',
     sgdb_tip: 'SteamGridDB is een covers-DB (alleen Engels zoeken).',
+  },
+  crop: {
+    title: 'Afbeelding bijsnijden',
+    tip: 'Sleep en zoom om het bijsnijgebied aan te passen',
+    zoom: 'Zoom',
+  },
+  error: {
+    file_too_large: 'Afbeeldingsbestand te groot, upload afbeeldingen kleiner dan {size}',
+    image_load_failed_retry: 'Laden van afbeelding mislukt, probeer opnieuw',
+    image_load_failed_select_another: 'Laden van afbeelding mislukt, probeer opnieuw of selecteer een andere afbeelding',
+    loading: 'Laden...',
+    processing: 'Verwerken...',
   },
 };
 

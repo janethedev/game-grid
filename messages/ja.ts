@@ -40,7 +40,7 @@ const ja = {
     edit_game_name: 'ゲーム名を編集',
     edit_main_title: 'メインタイトルを編集',
   },
-  common: { cancel: 'キャンセル', save: '保存', close: '閉じる' },
+  common: { cancel: 'キャンセル', save: '保存', close: '閉じる', confirm: '確認' },
   footer: {
     made_with: 'made with Copilot & Codex',
     if_useful_star: '役に立ったらスターをお願いします →',
@@ -81,6 +81,18 @@ const ja = {
     upload_image: '画像をアップロード',
     bangumi_tip: 'Bangumi はアニメ・ゲームに特化した中国語データベースです。',
     sgdb_tip: 'SteamGridDB はゲームカバーのデータベース（英語名検索のみ）。',
+  },
+  crop: {
+    title: '画像をトリミング',
+    tip: 'ドラッグまたはズームでトリミング範囲を調整',
+    zoom: 'ズーム',
+  },
+  error: {
+    file_too_large: '画像ファイルが大きすぎます。{size}以下の画像をアップロードしてください',
+    image_load_failed_retry: '画像の読み込みに失敗しました。再試行してください',
+    image_load_failed_select_another: '画像の読み込みに失敗しました。再試行するか別の画像を選択してください',
+    loading: '読み込み中...',
+    processing: '処理中...',
   },
 };
 

@@ -40,7 +40,7 @@ const ko = {
     edit_game_name: '게임 이름 편집',
     edit_main_title: '메인 제목 편집',
   },
-  common: { cancel: '취소', save: '저장', close: '닫기' },
+  common: { cancel: '취소', save: '저장', close: '닫기', confirm: '확인' },
   footer: {
     made_with: 'made with Copilot & Codex',
     if_useful_star: '도움이 되었다면 스타 부탁드립니다 →',
@@ -79,8 +79,20 @@ const ko = {
     results_count: '{count}개 결과',
     clear: '지우기',
     upload_image: '이미지 업로드',
-    bangumi_tip: 'Bangumi는 애니·게임에 특화된 중국어 DB입니다.',
-    sgdb_tip: 'SteamGridDB는 게임 커버 DB(영문 검색만 지원).',
+    bangumi_tip: 'Bangumi는 애니·게임에 특화된 중국어 DB입니다。',
+    sgdb_tip: 'SteamGridDB는 게임 커버 DB(영문 검색만 지원)。',
+  },
+  crop: {
+    title: '이미지 자르기',
+    tip: '드래그 및 줌으로 자르기 영역 조정',
+    zoom: '줌',
+  },
+  error: {
+    file_too_large: '이미지 파일이 너무 큽니다. {size}보다 작은 이미지를 업로드하세요',
+    image_load_failed_retry: '이미지 로드 실패, 다시 시도하세요',
+    image_load_failed_select_another: '이미지 로드 실패, 다시 시도하거나 다른 이미지를 선택하세요',
+    loading: '로딩 중...',
+    processing: '처리 중...',
   },
 };
 

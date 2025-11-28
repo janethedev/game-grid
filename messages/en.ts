@@ -46,6 +46,7 @@ const en = {
     cancel: 'Cancel',
     save: 'Save',
     close: 'Close',
+    confirm: 'Confirm',
   },
   footer: {
     made_with: 'made with Copilot & Codex',
@@ -87,6 +88,18 @@ const en = {
     upload_image: 'Upload image',
     bangumi_tip: 'Bangumi is a Chinese DB focused on anime and games; good coverage for ACG-related titles.',
     sgdb_tip: 'SteamGridDB is a cover database with many games; search supports English names only.',
+  },
+  crop: {
+    title: 'Crop Image',
+    tip: 'Drag and zoom to adjust crop area',
+    zoom: 'Zoom',
+  },
+  error: {
+    file_too_large: 'Image file is too large, please upload images smaller than {size}',
+    image_load_failed_retry: 'Image failed to load, please retry',
+    image_load_failed_select_another: 'Image failed to load, please retry or select another image',
+    loading: 'Loading...',
+    processing: 'Processing...',
   },
 };
 
